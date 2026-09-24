@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="DifficultyProfile" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/difficulty_profile.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = 2
+title = "Trudny"
+subtitle = "Dla podniebnych mistrzów • 9+"
+island_width = 134.0
+spacing = 395.0
+height_scale = 1.0
+movement_amplitude = 34.0
+movement_period = 4.8
+moving_every = 1
+accent = Color(0.65, 0.36, 0.47, 1)

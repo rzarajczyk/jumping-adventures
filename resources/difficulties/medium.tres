@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="DifficultyProfile" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/difficulty_profile.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = 1
+title = "Średni"
+subtitle = "Więcej przygód • 9+"
+island_width = 190.0
+spacing = 364.0
+height_scale = 0.85
+movement_amplitude = 24.0
+movement_period = 6.0
+moving_every = 2
+accent = Color(0.36, 0.43, 0.69, 1)

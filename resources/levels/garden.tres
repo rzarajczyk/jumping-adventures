@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="LevelDefinition" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/level_definition.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = 0
+title = "Chmurkowy Ogród"
+subtitle = "Pierwszy skok w wielką przygodę"
+art = "garden"
+tint = Color(1, 1, 1, 1)
+heights = PackedFloat32Array(0, 0, -12, -55, -20, 18, -28, -70, -35, 10, 35, -20, -65, -30, 15, -15, -55, -10, 20, -25, 0)
+gaps = PackedFloat32Array(0.94, 0.96, 1, 0.98, 1.04, 0.96, 1.03, 1, 0.96, 1.04, 1, 0.96, 1.02, 1.04, 0.98, 1, 1.02, 0.98, 1.02, 1)
+widths = PackedFloat32Array(1, 1.12, 1.1, 1.04, 1, 0.98, 1.02, 1, 0.98, 1.06, 1, 1.04, 1, 0.98, 1, 1.02, 0.98, 1, 1.04, 1, 1)
+motion_axes = PackedInt32Array(0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0)

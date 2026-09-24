@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="DifficultyProfile" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/difficulty_profile.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = 0
+title = "Łatwy"
+subtitle = "Spokojny początek • 6–8 lat"
+island_width = 256.0
+spacing = 324.0
+height_scale = 0.55
+movement_amplitude = 12.0
+movement_period = 7.5
+moving_every = 5
+accent = Color(0.20, 0.53, 0.48, 1)
