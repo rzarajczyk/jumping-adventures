@@ -1,95 +1,97 @@
 # Jumping Adventure
 
-Polska gra 2D na Androida: pięciu przyjaciół, latające wyspy i ocean. Trzy ręcznie zaprojektowane trasy × trzy trudności, oryginalna grafika kawaii, animacje, muzyka i efekty. Gra działa całkowicie offline.
+A 2D Android game about five friends, floating islands, and the ocean. Explore three hand-designed routes across three difficulty levels, with original kawaii artwork, animation, music, and sound effects. The game works completely offline.
 
-## Instalacja na telefonie
+## Install on Android
 
-1. Skopiuj `build/JumpingAdventure.apk` na telefon z Androidem 9+ i procesorem ARM64.
-2. Otwórz APK w aplikacji Pliki. Jeśli Android o to poprosi, zezwól tej aplikacji na instalowanie aplikacji z tego źródła.
-3. Wybierz **Zainstaluj**, następnie uruchom **Jumping Adventure**. Trzymaj telefon poziomo.
+1. Copy `build/JumpingAdventure.apk` to a phone running Android 9 or later with an ARM64 processor.
+2. Open the APK in the Files app. If prompted, allow that app to install apps from this source.
+3. Tap **Install**, then launch **Jumping Adventure**. Play with the phone in landscape orientation.
 
-APK jest podpisane lokalnym kluczem projektu. Aktualizacje podpisane tym samym kluczem można instalować na istniejącą wersję, zachowując postęp. Nie odinstalowuj gry przed aktualizacją, jeśli chcesz zachować gwiazdki. Wersja 1.1 jest aktualizacją dawnego Jumping Penguin: zachowuje identyfikator pakietu i klucz. Stare odblokowania, ustawienia dźwięku i wyniki są migrowane; dawna liczba rybek staje się liczbą małych gwiazdek, a ukończona plansza dostaje także punkt za gwiazdę mety. Na komputerze zachowujemy dawny katalog danych Godot/app_userdata/Jumping Penguin.
+The APK is signed with the project's local signing key. Updates signed with the same key can be installed over an existing version while preserving progress. Do not uninstall the game before updating if you want to keep your stars. Version 1.1 updates the original Jumping Penguin app and retains its package ID and signing key. Existing unlocks, audio settings, and scores are migrated: the old fish count becomes the small-star count, and each completed level also receives a point for its finish star. On desktop, the game keeps using the previous Godot data directory, `Godot/app_userdata/Jumping Penguin`.
 
-Po podłączeniu telefonu z włączonym debugowaniem USB można użyć:
+With USB debugging enabled on a connected phone, install and launch the game with:
 
 ```sh
 adb install -r build/JumpingAdventure.apk
 adb shell am start -n pl.rafal.jumpingpenguin/com.godot.game.GodotAppLauncher
 ```
 
-## Jak grać
+## How to play
 
-- Wybierz postać: pingwin, wieloryb, kapibara, kotek lub piesek. Wybór zostaje zapisany. Każda postać ma identyczną fizykę i trzy klatki animacji.
-- Wybierz trudność i odblokowaną planszę.
-- Przeciągnij palec w kierunku skoku, zwykle w górę i w prawo. Im dłuższy gest, tym większa siła. Puszczenie palca wykonuje skok.
-- Możesz rozpocząć gest w dowolnym miejscu poza przyciskami. Cofnięcie do punktu startu albo gest w dół anuluje skok.
-- Strzałka i pasek pokazują kierunek oraz siłę. Nie ma podglądu toru lotu ani sterowania w powietrzu.
-- Wyspy poruszają się także podczas celowania. Wpadnięcie do wody rozpoczyna tę planszę od nowa. Próby są nieograniczone.
-- Na każdej trasie można zdobyć 10 małych gwiazdek. Dotknięcie dużej gwiazdy na ostatniej wyspie daje jedenasty punkt i kończy planszę. Samo lądowanie na końcowej wyspie nie wystarcza.
-- Finał to animowane fajerwerki, konfetti i plansza „Zwycięstwo!” z wybraną postacią oraz liczbą zebranych gwiazdek. Kolejne plansze odblokowują się osobno dla każdej trudności.
-- Pauza zatrzymuje planszę; w jej menu można zmienić dźwięk, rozpocząć ponownie lub wybrać inną planszę.
+- Choose a character: penguin, whale, capybara, kitten, or puppy. Your choice is saved. All characters use the same physics and have three animation frames.
+- Choose a difficulty and an unlocked level.
+- Drag in the direction you want to jump, usually up and to the right. A longer drag applies more force. Release to jump.
+- Start a drag anywhere outside the buttons. Moving your finger back to the starting point or dragging downward cancels the jump.
+- The arrow and meter show the direction and strength. There is no trajectory preview or in-air control.
+- Islands keep moving while you aim. Falling into the water restarts the current level. Attempts are unlimited.
+- Each route has 10 small stars. Touch the large star on the final island to collect the eleventh star and finish the level. Landing on the final island alone is not enough.
+- The finish shows animated fireworks, confetti, and a victory screen with your character and star count. Levels unlock separately for each difficulty.
+- The pause menu stops the level and lets you change audio, restart the level, or choose another level.
 
-Easy jest przeznaczony dla dzieci 6–8 lat, medium i hard dla 9+. Każda trasa ma 20 odcinków między 21 wyspami. Docelowy czas udanej próby to 90–150 sekund z czasem na celowanie; nie ma limitu czasu. To cel projektowy do potwierdzenia w testach z dziećmi, nie wynik pomiaru na grupie odbiorców.
+Easy is designed for ages 6–8; medium and hard are for ages 9 and up. Each route has 20 jumps across 21 islands. A successful run is designed to take 90–150 seconds, including aiming time, with no time limit. This is a design target to validate with children, not a measured result.
 
-## Uruchomienie projektu
+## Open and run the project
 
-Otwórz `project.godot` w **Godot 4.7.2 Standard**, bez .NET, i naciśnij F5. Na komputerze gest wykonuje się lewym przyciskiem myszy. Escape otwiera pauzę.
+Install **Godot 4.7.2 Standard** (not .NET) for your operating system. In the Godot Project Manager, import this project by selecting `project.godot`, then run it. On desktop, aim with the left mouse button; press Escape to pause.
 
-Na tym Macu silnik jest już w `.tools/Godot.app`. Uruchomienie z terminala:
-
-```sh
-.tools/Godot.app/Contents/MacOS/Godot --path .
-```
-
-Przy odtwarzaniu projektu na innym Macu z Pythonem 3.11+:
+If Godot is available on your command line, you can also run:
 
 ```sh
-python3 tools/bootstrap.py
+godot --path .
 ```
 
-Skrypt pobiera oficjalny silnik 4.7.2 i szablony, sprawdza SHA512, rozpakowuje tylko potrzebne szablony Android i ustawia lokalny katalog danych edytora. Pobieranie archiwów zajmuje około 1,4 GB. `.tools` nie należy dodawać do repozytorium ani paczki źródeł.
+The helper `python3 tools/bootstrap.py` downloads the official macOS Godot editor 4.7.2 and Android export templates, verifies their SHA512 checksums, and extracts the files needed for Android. The download is about 1.4 GB. This bootstrap helper currently supports macOS; on other operating systems, install the matching Godot editor and export templates for your platform. Do not add `.tools` to the repository or source archive.
 
-## Budowanie APK
+## Build an Android APK
 
-Potrzebne są JDK 21 (szablony używają języka Java 17), Android SDK Platform 36, Build Tools 36.1.0, Platform Tools i zaakceptowane licencje SDK. Android Studio może zainstalować te pakiety. Gradle 8.11.1 i zależności pobierają się przez wrapper przy pierwszej kompilacji. Korzystamy z gotowych bibliotek Godot; nie kompilujemy silnika z C++.
+To export Android, install JDK 21 (the templates use Java 17), Android SDK Platform 36, Build Tools 36.1.0, Platform Tools, and accept the SDK licences. Android Studio can install these packages. Install the export templates matching Godot 4.7.2 and configure the Android SDK and Java SDK paths in Godot's Editor Settings. Godot uses the included libraries; the engine is not compiled from C++.
+
+For a manual export on any operating system, open **Project > Export**, select the Android preset, and export the project. This preset points to custom Godot templates under `.tools/templates/`; install the matching Android templates there or update the preset's custom template paths for your machine. The APK is written to `build/JumpingAdventure.apk`.
+
+The repeatable command-line build helper is currently configured for macOS and uses Gradle 8.11.1:
 
 ```sh
 python3 tools/test.py
 python3 tools/build_android.py
 ```
 
-Skrypt budowania importuje zasoby, instaluje szablon projektu Gradle, eksportuje wariant release i weryfikuje podpis APK. Domyślnie używa SDK z `~/Library/Android/sdk` oraz JDK z `/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home`.
+The build helper imports project assets, prepares the Gradle project, exports a release APK, and verifies its signature. Its executable, SDK, and JDK paths can be overridden with `PENGUIN_GODOT`, `PENGUIN_ANDROID_SDK`, and `PENGUIN_JAVA`. The Godot executable used by the helper must use a local `_sc_` data directory under `.tools`.
 
-Ścieżki można zmienić zmiennymi `PENGUIN_GODOT`, `PENGUIN_ANDROID_SDK` i `PENGUIN_JAVA`. Własny silnik macOS powinien korzystać z lokalnego trybu `_sc_`, którego katalog `editor_data` znajduje się w `.tools`; skrypt jest przygotowany i sprawdzony dla układu tworzonego przez `bootstrap.py`.
+The signing key `.tools/jumping-penguin.keystore` and its password file `.tools/signing.json` are created once. **Keep private backups of both files** so future APKs can update existing installations. They are not included in the APK, source archive, or repository. App ID: `pl.rafal.jumpingpenguin`; version: `1.1.0` (version code 2); minimum SDK: 28; target SDK: 36; ABI: `arm64-v8a`.
 
-Klucz `.tools/jumping-penguin.keystore` oraz hasło w `.tools/signing.json` powstają raz, automatycznie. **Zachowaj ich prywatną kopię**, aby następne APK mogły aktualizować tę instalację. Nie są dołączane do APK, paczki źródeł ani repozytorium. Identyfikator aplikacji: `pl.rafal.jumpingpenguin`, wersja: `1.1.0` (kod 2), min SDK 28, target SDK 36, ABI `arm64-v8a`.
+## Automated GitHub releases
 
-## Organizacja i strojenie
+Once the repository secrets below are configured, every push to `master` builds a signed APK on a macOS runner and publishes a GitHub Release. Releases are tagged `v1.1.N`, where `N` is the workflow run number; each APK gets a monotonically increasing Android version code and a SHA-256 checksum file.
 
-- `scripts/gesture.gd`: martwa strefa 16 jednostek, pełna siła przy 240 jednostkach gestu, maksymalna prędkość 850. Współrzędne są normalizowane przez skalowanie viewportu Godot.
-- `scripts/penguin.gd`: CharacterBody2D, grawitacja 1200, fizyka 60 Hz, brak przejęcia prędkości wyspy przy opuszczeniu powierzchni.
-- `scripts/world.gd`: przebieg próby, sinusoidalny ruch wysp, gwiazdki, reset, kamera i meta.
-- `resources/levels`: trzy definicje tras; `resources/difficulties`: szerokości, odstępy i ruch dla easy/medium/hard. Do zmiany balansu nie trzeba edytować interfejsu.
-- `scripts/main.gd`: polski interfejs, pauza, bezpieczne marginesy i obsługa przejścia aplikacji do tła.
-- `scripts/characters.gd`: katalog postaci; `scripts/fireworks.gd`: animowane fajerwerki i konfetti.
-- `scripts/progress.gd`: lokalny zapis `user://progress.cfg`, osobny postęp dla każdej trudności; zapis przez plik tymczasowy.
-- `assets/art`: oryginalne obrazy PNG, w tym trzy klatki pingwina; `docs/ART_PROMPTS.md` oraz `docs/ART_ADVENTURE.md`: pełne prompty użyte we wbudowanym imagegen.
-- `tools/generate_audio.py`: odtwarzalny generator autorskiej 40-sekundowej melodii i sześciu efektów; wystarcza biblioteka standardowa Pythona.
+Add these under **Settings > Secrets and variables > Actions** to sign the APK with the existing project key: `ANDROID_KEYSTORE_BASE64` (the keystore encoded as one-line Base64), `ANDROID_KEYSTORE_PASSWORD`, and `ANDROID_KEY_ALIAS`. Keep these values in GitHub Actions secrets; never commit the keystore or its password file.
 
-Zmiana oryginalnych PNG wymaga aktualizacji regionów `AtlasTexture` w `scripts/art.gd`. Kontur fizyczny wyspy zaznacza jasny rant. Cała gra korzysta z renderera Compatibility.
+## Project structure and tuning
 
-## Weryfikacja
+- `scripts/gesture.gd`: 16-unit dead zone, full force at a 240-unit drag, maximum speed 850. Coordinates account for Godot viewport scaling.
+- `scripts/penguin.gd`: `CharacterBody2D`, gravity 1200, physics at 60 Hz, and no carry-over of island velocity when jumping.
+- `scripts/world.gd`: level flow, sinusoidal island motion, stars, resets, camera, and finish goal.
+- `resources/levels`: three route definitions. `resources/difficulties`: island widths, gaps, and movement for easy, medium, and hard. Adjust the balance without editing the UI.
+- `scripts/main.gd`: Polish-language UI, pause handling, safe margins, and app background handling.
+- `scripts/characters.gd`: character catalog. `scripts/fireworks.gd`: animated fireworks and confetti.
+- `scripts/progress.gd`: local save at `user://progress.cfg`, separate progress for each difficulty, written through a temporary file.
+- `assets/art`: original PNG artwork, including three penguin frames. `docs/ART_ADVENTURE.md` contains the prompts used with the built-in image generator.
+- `tools/generate_audio.py`: reproducible generator for the original 40-second music loop and six sound effects; it uses only the Python standard library.
 
-`python3 tools/test.py` uruchamia testy w rzeczywistym silniku Godot. Skrypt sprawdza kod wyjścia, liczbę wykonanych sprawdzeń i błędy skryptów, zapisując raport do `build/test-results.txt`. Automat wykonuje skoki przez wszystkie dziewięć tras i zbiera po 11 gwiazdek (w tym dużą na mecie). Nie zastępuje oceny wygody sterowania ani balansu przez dzieci.
+When replacing an original PNG, update its `AtlasTexture` regions in `scripts/art.gd`. The bright rim marks each island's physical landing surface. The game uses the Compatibility renderer.
 
-Zrzuty kontrolne interfejsu można odtworzyć poleceniem:
+## Verification
+
+`python3 tools/test.py` runs tests in the Godot engine. It checks the process exit code, number of checks, and script errors, then writes a report to `build/test-results.txt`. The automated run plays through all nine routes and collects all 11 stars on each. It does not measure how comfortable the controls feel or whether the difficulty is balanced for children.
+
+To capture UI screenshots, run:
 
 ```sh
-.tools/Godot.app/Contents/MacOS/Godot --path . --script tests/capture.gd
+godot --path . --script tests/capture.gd
 ```
 
-Dokładne wyniki, sprawdzone urządzenia i ograniczenia znajdują się w `docs/TEST_REPORT.md`.
+See `docs/TEST_REPORT.md` for detailed results, tested devices, and limitations.
 
-## Zasoby i licencje
+## Assets and licences
 
-Grafiki powstały wbudowanym narzędziem imagegen, a muzyka i efekty z autorskiego generatora. Nunito jest objęte SIL Open Font License (`assets/fonts/OFL.txt`). Informacje o licencji Godot i jego bibliotek są w `assets/licenses` i są dołączane do APK. Projekt nie zawiera usług sieciowych, analityki, reklam ani zakupów.
+The artwork was created with the built-in image generator. The original music and sound effects were created with the project's audio generator. Nunito is licensed under the SIL Open Font License (`assets/fonts/OFL.txt`). Godot and third-party licence notices are in `assets/licenses` and are included in the APK. The project has no network services, analytics, ads, or in-app purchases.

@@ -1,0 +1,126 @@
+name: Android Release
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build, sign, and publish APK
+    runs-on: macos-15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-36" "build-tools;36.1.0"
+
+      - name: Download Godot and Android export templates
+        run: python3 tools/bootstrap.py
+
+      - name: Set release version
+        env:
+          RELEASE_NUMBER: ${{ github.run_number }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          number = int(os.environ["RELEASE_NUMBER"])
+          version_name = f"1.1.{number}"
+          version_code = 1_000_000 + number
+          path = Path("export_presets.cfg")
+          source = path.read_text()
+          source, code_matches = re.subn(
+              r"(?m)^version/code=\d+$", f"version/code={version_code}", source, count=1
+          )
+          source, name_matches = re.subn(
+              r'(?m)^version/name="[^"]+"$', f'version/name="{version_name}"', source, count=1
+          )
+          if code_matches != 1 or name_matches != 1:
+              raise SystemExit("Could not set the Android release version in export_presets.cfg")
+          path.write_text(source)
+          Path("build").mkdir(exist_ok=True)
+          Path("build/release-version.txt").write_text(version_name + "\n")
+          PY
+
+      - name: Restore Android signing credentials
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          from pathlib import Path
+
+          values = {
+              "ANDROID_KEYSTORE_BASE64": os.environ.get("ANDROID_KEYSTORE_BASE64", ""),
+              "ANDROID_KEYSTORE_PASSWORD": os.environ.get("ANDROID_KEYSTORE_PASSWORD", ""),
+              "ANDROID_KEY_ALIAS": os.environ.get("ANDROID_KEY_ALIAS", ""),
+          }
+          missing = [name for name, value in values.items() if not value]
+          if missing:
+              raise SystemExit("Missing GitHub Actions secrets: " + ", ".join(missing))
+
+          tools = Path(".tools")
+          tools.mkdir(exist_ok=True)
+          keystore = tools / "jumping-penguin.keystore"
+          keystore.write_bytes(base64.b64decode(values["ANDROID_KEYSTORE_BASE64"], validate=True))
+          keystore.chmod(0o600)
+          credentials = tools / "signing.json"
+          credentials.write_text(json.dumps({
+              "password": values["ANDROID_KEYSTORE_PASSWORD"],
+              "alias": values["ANDROID_KEY_ALIAS"],
+          }))
+          credentials.chmod(0o600)
+          PY
+
+      - name: Build and sign APK
+        run: |
+          export PENGUIN_ANDROID_SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          export PENGUIN_JAVA="$JAVA_HOME"
+          test -n "$PENGUIN_ANDROID_SDK"
+          python3 tools/build_android.py
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_NUMBER: ${{ github.run_number }}
+        run: |
+          VERSION="1.1.${RELEASE_NUMBER}"
+          TAG="v${VERSION}"
+          APK="build/JumpingAdventure-${VERSION}.apk"
+          cp build/JumpingAdventure.apk "$APK"
+          shasum -a 256 "$APK" > "${APK}.sha256"
+          NOTES="build/release-notes.md"
+          printf 'Automated signed Android build for commit %s.\n\nWorkflow run: %s/%s/actions/runs/%s\n' \
+            "$GITHUB_SHA" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > "$NOTES"
+
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$APK" "${APK}.sha256" --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$TAG" --title "Jumping Adventure ${VERSION}" --notes-file "$NOTES" --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" "$APK" "${APK}.sha256" \
+              --target "$GITHUB_SHA" \
+              --title "Jumping Adventure ${VERSION}" \
+              --notes-file "$NOTES" \
+              --latest \
+              --repo "$GITHUB_REPOSITORY"
+          fi
