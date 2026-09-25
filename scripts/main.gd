@@ -258,8 +258,6 @@ func _build_hud() -> void:
 	_panel(stage, Rect2(896, 29, 160, 67))
 	_picture(stage, "star", Rect2(911, 44, 36, 36))
 	star_label = _label(stage, "0 / 11", Rect2(961, 44, 85, 40), 25, INK, true)
-	var restart := _button(stage, "↻", Rect2(1071, 29, 68, 67), func(): start_level(level_index))
-	restart.name = "RestartButton"
 	var pause_button := _button(stage, "Ⅱ", Rect2(1152, 29, 75, 67), pause_game)
 	pause_button.name = "PauseButton"
 	progress_bar = ProgressBar.new()
