@@ -62,7 +62,7 @@ jobs:
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_ALIAS: penguin
         run: |
           python3 - <<'PY'
           import base64
@@ -73,7 +73,7 @@ jobs:
           values = {
               "ANDROID_KEYSTORE_BASE64": os.environ.get("ANDROID_KEYSTORE_BASE64", ""),
               "ANDROID_KEYSTORE_PASSWORD": os.environ.get("ANDROID_KEYSTORE_PASSWORD", ""),
-              "ANDROID_KEY_ALIAS": os.environ.get("ANDROID_KEY_ALIAS", ""),
+              "ANDROID_KEY_ALIAS": os.environ["ANDROID_KEY_ALIAS"],
           }
           missing = [name for name, value in values.items() if not value]
           if missing:

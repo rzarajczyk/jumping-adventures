@@ -64,7 +64,7 @@ The signing key `.tools/jumping-penguin.keystore` and its password file `.tools/
 
 Once the repository secrets below are configured, every push to `master` builds a signed APK on a macOS runner and publishes a GitHub Release. Releases are tagged `v1.1.N`, where `N` is the workflow run number; each APK gets a monotonically increasing Android version code and a SHA-256 checksum file.
 
-Add these under **Settings > Secrets and variables > Actions** to sign the APK with the existing project key: `ANDROID_KEYSTORE_BASE64` (the keystore encoded as one-line Base64), `ANDROID_KEYSTORE_PASSWORD`, and `ANDROID_KEY_ALIAS`. Keep these values in GitHub Actions secrets; never commit the keystore or its password file.
+Add `ANDROID_KEYSTORE_BASE64` (the keystore encoded as one-line Base64) and `ANDROID_KEYSTORE_PASSWORD` under **Settings > Secrets and variables > Actions** to sign the APK with the existing project key. The workflow uses the key's non-secret alias, `penguin`. Keep the keystore and password private; never commit them.
 
 ## Project structure and tuning
 
