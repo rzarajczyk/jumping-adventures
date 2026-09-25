@@ -18,7 +18,7 @@ var bold: FontVariation
 var difficulty: int = 0
 var level_index: int = 0
 var screen := "home"
-var fish_label: Label
+var star_label: Label
 var progress_bar: ProgressBar
 var power_bar: ProgressBar
 var hint_label: Label
@@ -26,6 +26,7 @@ var hint_panel: Panel
 var splash_label: Label
 var hero: TextureRect
 var menu_clock: float = 0.0
+var hero_base_y: float = 239.0
 var pause_overlay := false
 var application_suspended := false
 
@@ -82,7 +83,7 @@ func _clear() -> void:
 		child.queue_free()
 	modal = null
 	hero = null
-	fish_label = null
+	star_label = null
 	progress_bar = null
 	power_bar = null
 	hint_label = null
@@ -163,28 +164,52 @@ func _picture(parent: Node, art: String, rect: Rect2) -> TextureRect:
 	view.size = rect.size
 	return view
 
+func _character_picture(parent: Node, id: String, rect: Rect2) -> TextureRect:
+	var view := _picture(parent, "penguin", rect)
+	view.texture = AdventureCharacters.frame(id)
+	return view
+
 func show_home() -> void:
 	_leave_world()
 	_clear()
 	screen = "home"
-	_panel(stage, Rect2(65, 120, 625, 465), Color(1, 0.995, 0.966, 0.88), 34)
-	_picture(stage, "penguin", Rect2(68, 38, 38, 44))
-	_label(stage, "JUMPING PENGUIN", Rect2(120, 40, 330, 44), 24, INK, true)
+	_panel(stage, Rect2(65, 120, 625, 465), Color(1, 0.995, 0.966, 0.92), 34)
+	_picture(stage, "star", Rect2(68, 38, 42, 44))
+	_label(stage, "JUMPING ADVENTURE", Rect2(120, 40, 470, 44), 24, INK, true)
 	_button(stage, "Dźwięk", Rect2(1092, 34, 128, 54), show_settings)
-	_label(stage, "MAŁY PINGWIN, WIELKI ŚWIAT", Rect2(101, 149, 560, 35), 17, TEAL, true)
-	_label(stage, "Przygoda\nna wyciągnięcie płetwy.", Rect2(98, 195, 580, 165), 48, INK, true)
-	_label(stage, "Skacz po chmurach. Łap rybki. Sięgaj gwiazd.", Rect2(102, 367, 565, 40), 22, MUTED)
+	_label(stage, "MAŁE ŁAPKI, WIELKIE MARZENIA", Rect2(101, 149, 560, 35), 17, TEAL, true)
+	_label(stage, "Wielka przygoda\nmałych przyjaciół.", Rect2(98, 195, 580, 165), 48, INK, true)
+	_label(stage, "Skacz po wyspach. Zbieraj gwiazdki!", Rect2(102, 367, 565, 40), 23, MUTED)
 	for i in 3:
 		var b := _button(stage, PROFILES[i].title, Rect2(101 + i * 178, 425, 164, 56), func(): difficulty = i; show_home(), difficulty == i)
 		b.name = "Difficulty%d" % i
-	_button(stage, "Wybierz wyspę   →", Rect2(101, 501, 520, 62), show_levels, true)
+	_button(stage, "Start   →", Rect2(101, 501, 520, 62), show_levels, true)
 	_picture(stage, "garden", Rect2(756, 483, 422, 150))
-	hero = _picture(stage, "penguin", Rect2(834, 239, 248, 277))
-	_picture(stage, "fish", Rect2(752, 236, 64, 50))
-	_picture(stage, "fish", Rect2(1112, 344, 62, 46))
-	_label(stage, "OCEAN MOŻLIWOŚCI", Rect2(839, 166, 345, 40), 16, TEAL, true)
-	_label(stage, "3 krainy   ·   3 trudności   ·   mnóstwo skoków", Rect2(83, 635, 800, 36), 20, INK)
-	_label(stage, "Stworzone do wspólnej zabawy", Rect2(913, 650, 330, 30), 17, MUTED)
+	hero_base_y = 239
+	hero = _character_picture(stage, Progress.selected_character, Rect2(834, hero_base_y, 248, 277))
+	_picture(stage, "star", Rect2(752, 256, 64, 64))
+	_picture(stage, "star", Rect2(1112, 344, 62, 62))
+	_label(stage, AdventureCharacters.display_name(Progress.selected_character), Rect2(806, 173, 320, 48), 29, TEAL, true).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var choose := _button(stage, "Zmień postać", Rect2(822, 600, 280, 62), show_characters)
+	choose.name = "ChooseCharacter"
+	_label(stage, "5 przyjaciół   ·   3 krainy   ·   mnóstwo gwiazdek", Rect2(83, 635, 730, 36), 20, INK)
+
+func show_characters() -> void:
+	_leave_world()
+	_clear()
+	screen = "characters"
+	_button(stage, "←  Wróć", Rect2(58, 38, 147, 56), show_home)
+	_label(stage, "Kto dziś wyrusza w przygodę?", Rect2(64, 126, 1150, 70), 44, INK, true)
+	_label(stage, "Każdy skacze tak samo dobrze. Wybierz swojego przyjaciela!", Rect2(67, 197, 1140, 36), 22, MUTED)
+	for i in AdventureCharacters.IDS.size():
+		var id: String = AdventureCharacters.IDS[i]
+		var selected := id == Progress.selected_character
+		var card := _button(stage, "", Rect2(48 + i * 238, 268, 224, 303), func(): Progress.select_character(id); show_characters(), selected)
+		card.name = "Character_" + id
+		_character_picture(card, id, Rect2(30, 24, 164, 174))
+		_label(card, AdventureCharacters.NAMES[i], Rect2(10, 209, 204, 40), 27, CREAM if selected else INK, true).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_label(card, "✓  Wybrano" if selected else "Wybierz mnie", Rect2(10, 256, 204, 30), 18, CREAM if selected else MUTED).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_button(stage, "Ruszamy!   →", Rect2(430, 614, 420, 64), show_levels, true)
 
 func show_levels() -> void:
 	_leave_world()
@@ -202,10 +227,10 @@ func show_levels() -> void:
 		_label(card, "0%d" % (i + 1), Rect2(24, 14, 64, 38), 24, MUTED, true)
 		_picture(card, LEVELS[i].art, Rect2(26, 68, 316, 121))
 		_label(card, LEVELS[i].title, Rect2(23, 194, 330, 43), 27, INK, true)
-		var stars: int = Progress.best(difficulty, i).stars
-		var detail := ("★".repeat(stars) + "☆".repeat(3 - stars)) if open else "Najpierw ukończ poprzednią wyspę"
-		_label(card, detail, Rect2(24, 244, 332, 40), 30 if open else 17, GOLD if open else MUTED, open)
-	_label(stage, "Rybki są dla chętnych. Każda ukończona wyprawa to gwiazdka!", Rect2(67, 638, 1100, 35), 21, INK)
+		var collected: int = Progress.best(difficulty, i).collected
+		var detail := ("★  %d / 11 gwiazdek" % collected) if open else "Najpierw ukończ poprzednią wyspę"
+		_label(card, detail, Rect2(24, 244, 332, 40), 25 if open else 17, GOLD if open else MUTED, open)
+	_label(stage, "10 małych gwiazdek po drodze + wielka gwiazda na mecie!", Rect2(67, 638, 1100, 35), 21, INK)
 
 func start_level(index: int) -> void:
 	_leave_world()
@@ -216,9 +241,10 @@ func start_level(index: int) -> void:
 	backdrop.tint = LEVELS[index].tint
 	world = PenguinWorld.new()
 	world.process_mode = Node.PROCESS_MODE_PAUSABLE
+	world.character_id = Progress.selected_character
 	world.definition = LEVELS[index]
 	world.profile = PROFILES[difficulty]
-	world.fish_changed.connect(_fish_changed)
+	world.stars_changed.connect(_stars_changed)
 	world.completed.connect(_won)
 	world.island_reached.connect(_island_reached)
 	world.retry_started.connect(func(): if is_instance_valid(hint_panel): hint_panel.visible = level_index == 0)
@@ -230,8 +256,8 @@ func _build_hud() -> void:
 	_label(stage, LEVELS[level_index].title, Rect2(67, 37, 370, 35), 24, INK, true)
 	_label(stage, "%s  ·  Wyprawa %d / 3" % [PROFILES[difficulty].title, level_index + 1], Rect2(68, 74, 370, 25), 16, MUTED)
 	_panel(stage, Rect2(896, 29, 160, 67))
-	_picture(stage, "fish", Rect2(911, 45, 41, 32))
-	fish_label = _label(stage, "0 / 10", Rect2(961, 44, 85, 40), 25, INK, true)
+	_picture(stage, "star", Rect2(911, 44, 36, 36))
+	star_label = _label(stage, "0 / 11", Rect2(961, 44, 85, 40), 25, INK, true)
 	var restart := _button(stage, "↻", Rect2(1071, 29, 68, 67), func(): start_level(level_index))
 	restart.name = "RestartButton"
 	var pause_button := _button(stage, "Ⅱ", Rect2(1152, 29, 75, 67), pause_game)
@@ -245,7 +271,7 @@ func _build_hud() -> void:
 	progress_bar.add_theme_stylebox_override("background", _box(Color(1, 1, 1, 0.65), 7, false))
 	progress_bar.add_theme_stylebox_override("fill", _box(TEAL, 7, false))
 	stage.add_child(progress_bar)
-	_label(stage, "Twoja droga do mety", Rect2(478, 68, 370, 26), 15, MUTED).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_label(stage, "Twoja droga do wielkiej gwiazdy", Rect2(478, 68, 370, 26), 15, MUTED).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint_panel = _panel(stage, Rect2(354, 534, 572, 120), Color(1, 0.995, 0.97, 0.93), 22)
 	hint_panel.visible = level_index == 0
 	_label(hint_panel, "●    ↗    ✧", Rect2(24, 22, 164, 54), 34, TEAL, true)
@@ -263,9 +289,9 @@ func _build_hud() -> void:
 	splash_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	splash_label.visible = false
 
-func _fish_changed(count: int) -> void:
-	if is_instance_valid(fish_label):
-		fish_label.text = "%d / 10" % count
+func _stars_changed(count: int) -> void:
+	if is_instance_valid(star_label):
+		star_label.text = "%d / 11" % count
 
 func _island_reached(index: int) -> void:
 	if is_instance_valid(progress_bar):
@@ -275,7 +301,7 @@ func _island_reached(index: int) -> void:
 		if index == 0:
 			hint_label.text = "Przeciągnij w górę i w prawo.\nPuść palec, żeby skoczyć!"
 		elif index == 1:
-			hint_label.text = "Dłuższy gest = mocniejszy skok.\nRybki dodają gwiazdek!"
+			hint_label.text = "Dłuższy gest = mocniejszy skok.\nZbieraj gwiazdki po drodze!"
 		elif index == 2:
 			hint_label.text = "Wyspa się rusza? Wybierz moment.\nMożesz spokojnie poczekać."
 
@@ -338,23 +364,49 @@ func show_settings() -> void:
 
 func _won(count: int) -> void:
 	Progress.complete(difficulty, level_index, count)
-	var ui := _overlay()
-	_label(ui, "Wspaniały skok!", Rect2(401, 132, 480, 64), 42, INK, true).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var stars := Progress.stars_for(count)
-	_label(ui, "★".repeat(stars) + "☆".repeat(3 - stars), Rect2(401, 207, 480, 88), 67, GOLD, true).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_label(ui, "Zebrane rybki: %d / 10" % count, Rect2(401, 310, 480, 40), 26, INK).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var subtitle := "Kolejna wyspa już na Ciebie czeka!" if level_index < 2 else "Cała podniebna kraina jest Twoja!"
-	_label(ui, subtitle, Rect2(391, 364, 500, 33), 20, MUTED).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_button(ui, "Następna wyspa   →" if level_index < 2 else "Wybór wyspy", Rect2(416, 424, 450, 64), func():
+	_clear()
+	screen = "victory"
+	modal = Control.new()
+	modal.size = stage.size
+	modal.mouse_filter = Control.MOUSE_FILTER_STOP
+	stage.add_child(modal)
+	var shade := ColorRect.new()
+	shade.position = -get_viewport_rect().size
+	shade.size = get_viewport_rect().size * 3
+	shade.color = Color(0.08, 0.16, 0.27, 0.76)
+	modal.add_child(shade)
+	var fireworks := AdventureFireworks.new()
+	fireworks.name = "Fireworks"
+	modal.add_child(fireworks)
+	var card := _panel(modal, Rect2(270, 68, 740, 584), CREAM, 38)
+	card.name = "VictoryCard"
+	card.pivot_offset = card.size * 0.5
+	_label(card, "WYPRAWA UKOŃCZONA", Rect2(30, 27, 680, 30), 17, TEAL, true).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_label(card, "Zwycięstwo!", Rect2(25, 66, 690, 66), 48, INK, true).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_character_picture(card, Progress.selected_character, Rect2(180, 146, 146, 153))
+	_picture(card, "star", Rect2(388, 146, 144, 144))
+	_label(card, "+", Rect2(337, 180, 52, 65), 40, GOLD, true).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var score := _label(card, "Zebrane gwiazdki: %d / 11" % count, Rect2(30, 316, 680, 52), 33, INK, true)
+	score.name = "VictoryScore"
+	score.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var subtitle := "Wszystkie gwiazdki są Twoje!" if count == 11 else "Wielka gwiazda zdobyta. Brawo!"
+	_label(card, subtitle, Rect2(35, 374, 670, 36), 23, TEAL).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_button(card, "Następna wyspa   →" if level_index < 2 else "Wybór wyspy", Rect2(55, 431, 630, 62), func():
 		if level_index < 2: start_level(level_index + 1)
 		else: show_levels()
-	, true)
-	_button(ui, "Jeszcze raz", Rect2(416, 507, 450, 59), func(): start_level(level_index))
+	, true).name = "NextLevelButton"
+	_button(card, "Jeszcze raz", Rect2(55, 510, 303, 52), func(): start_level(level_index))
+	_button(card, "Menu", Rect2(382, 510, 303, 52), show_home)
+	card.scale = Vector2.ONE * 0.82
+	card.modulate.a = 0
+	var tween := create_tween().set_parallel(true)
+	tween.tween_property(card, "scale", Vector2.ONE, 0.55).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(card, "modulate:a", 1.0, 0.3)
 
 func _process(delta: float) -> void:
 	menu_clock += delta
 	if is_instance_valid(hero):
-		hero.position.y = 239.0 + sin(menu_clock * 2.0) * 5.0
+		hero.position.y = hero_base_y + sin(menu_clock * 2.0) * 5.0
 	if is_instance_valid(world):
 		backdrop.scroll = world.camera.position.x - get_viewport_rect().size.x * 0.5
 		if is_instance_valid(power_bar):
@@ -369,7 +421,7 @@ func _input(event: InputEvent) -> void:
 		if is_instance_valid(world):
 			if pause_overlay: resume_game()
 			else: pause_game()
-		elif screen == "levels": show_home()
+		elif screen in ["levels", "characters"]: show_home()
 		get_viewport().set_input_as_handled()
 	# Complete a gesture even when the finger ends on top of a HUD button.
 	if is_instance_valid(world) and not get_tree().paused and world.gesture.pointer != -99:
@@ -397,4 +449,4 @@ func _notification(what: int) -> void:
 		Sound.suspend_audio(false)
 	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		if is_instance_valid(world): pause_game()
-		elif screen == "levels": show_home()
+		elif screen in ["levels", "characters"]: show_home()

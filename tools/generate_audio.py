@@ -46,7 +46,7 @@ for i, pitch in enumerate(melody):
     note(music, i * 2 * beat, 1.1, pitch, 0.22)
 save("music", music)
 
-for name, tones in {"fish": [84, 88], "win": [72, 76, 79, 84], "tap": [79], "land": [60]}.items():
+for name, tones in {"star": [84, 88], "win": [72, 76, 79, 84], "tap": [79], "land": [60]}.items():
     samples = [0.0] * int((len(tones) * 0.12 + 0.4) * RATE)
     for i, tone in enumerate(tones):
         note(samples, i * 0.12, 0.35, tone, 0.36 if name != "land" else 0.16, True)

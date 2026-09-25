@@ -14,5 +14,5 @@ log = result.stdout
 print(log)
 summary = re.search(r"RESULT: (\d+) checks, (\d+) failures", log)
 ok = result.returncode == 0 and summary and int(summary[1]) >= 1158 and int(summary[2]) == 0
-ok = ok and "SCRIPT ERROR" not in log and "ERROR:" not in log and log.count("finished=true, fish=10") == 9
+ok = ok and "SCRIPT ERROR" not in log and "ERROR:" not in log and log.count("finished=true, stars=11") == 9
 sys.exit(0 if ok else 1)

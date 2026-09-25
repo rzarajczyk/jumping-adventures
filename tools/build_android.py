@@ -64,7 +64,7 @@ def main():
     env["GODOT_ANDROID_KEYSTORE_RELEASE_USER"] = credentials["alias"]
     env["GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD"] = credentials["password"]
     (ROOT / "build").mkdir(exist_ok=True)
-    output = ROOT / "build/JumpingPenguin.apk"
+    output = ROOT / "build/JumpingAdventure.apk"
     run(ENGINE, "--headless", "--path", ROOT, "--export-release", "Android", output, env=env)
     versions = sorted((SDK / "build-tools").iterdir(), key=lambda p: tuple(int(n) for n in p.name.split(".") if n.isdigit()))
     run(versions[-1] / "apksigner", "verify", "--verbose", output, env={**env, "JAVA_HOME": str(JDK)})

@@ -1,4 +1,42 @@
-# Raport weryfikacji — 24 września 2026
+# Raport weryfikacji — Jumping Adventure 1.1.0
+
+## Aktualizacja z 25 września 2026
+
+APK release `build/JumpingAdventure.apk`, kod wersji 2, nazwa **Jumping Adventure**. Zachowano pakiet `pl.rafal.jumpingpenguin` i klucz podpisujący poprzednią wersję. Godot 4.7.2, Compatibility, ARM64, min SDK 28, target SDK 36.
+
+### Automatyczne testy
+
+`python3 tools/test.py`: **1224 sprawdzenia, 0 niepowodzeń**, bez błędów skryptów. Wszystkie dziewięć tras ukończonych w rzeczywistej fizyce Godot z wynikiem **11/11 gwiazdek**. Surowy raport: `build/test-results.txt`.
+
+Oprócz dotychczasowych testów gestów, fizyki, pauzy i resetu sprawdzono:
+
+- wybór każdej z pięciu postaci, dostępność klatek animacji, skok, lądowanie i zachowanie wyboru po upadku;
+- trwały zapis wyboru i migrację starych wyników oraz odblokowań;
+- pojedyncze naliczanie dużej gwiazdy, brak zwycięstwa od samego lądowania na ostatniej wyspie oraz zwycięstwo po dotknięciu gwiazdy;
+- dokładną liczbę gwiazdek w podsumowaniu, obecność fajerwerków i przejście do kolejnej planszy.
+
+### Wygląd
+
+Obejrzano zrzuty Godot: menu, pięć kart wyboru postaci, każdą postać w grze, dużą gwiazdę i planszę zwycięstwa z fajerwerkami. Kontrola obejmowała 1280×720 i 1600×720. Grafiki postaci i gwiazdki są zapisane w `assets/art`; pełne prompty: `docs/ART_ADVENTURE.md`.
+
+### Działający APK na Androidzie
+
+Emulator Pixel 10, ARM64, obraz `android-37.0/google_apis_playstore_ps16k/arm64-v8a`, poziomy ekran 2424×1080, host Apple M1 Pro.
+
+- Instalacja przez `adb install -r` na istniejącą wersję 1.0.0: sukces.
+- Przed aktualizacją wyciszono muzykę; nowa wersja zachowała to ustawienie, pozostawiając efekty włączone.
+- Wybór pieska dotykiem, wymuszone zamknięcie i ponowne uruchomienie: wybór zachowany.
+- Uruchomienie planszy, skoki sterowane gestami, lądowanie oraz zebranie gwiazdki: potwierdzone na emulatorze (HUD 1/11).
+- W odczytanym logcat Godot/AndroidRuntime brak błędów skryptów i awarii.
+- Metadane APK potwierdzają nową nazwę, wersję 1.1.0, min SDK 28, target SDK 36 oraz ARM64. `apksigner verify --verbose` potwierdza podpis v2.
+
+Zrzuty Androida: `build/android-new-settings.png`, `build/android-characters.png`, `build/android-character-persistence.png`, `build/android-adventure-game.png`, `build/android-star-collected.png`.
+
+**Wersji 1.1.0 nie sprawdzono na fizycznym telefonie.** Telefony były odłączone. Nie deklarujemy potwierdzonych 60 FPS ani balansu i czasu przejścia w testach z dziećmi. Aktualizacja nie została jeszcze zainstalowana na telefonach użytkownika.
+
+---
+
+# Archiwalny raport wersji 1.0.0 — 24 września 2026
 
 ## Wersja
 

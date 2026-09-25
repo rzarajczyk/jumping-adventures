@@ -11,6 +11,7 @@ var clock: float = 0.0
 var squash: float = 0.0
 var facing: float = 1.0
 var last_island: SkyIsland
+var character_id := "penguin"
 var sprite: Texture2D
 var blink_sprite: Texture2D
 var flying_sprite: Texture2D
@@ -30,9 +31,9 @@ func _ready() -> void:
 	shape.shape = capsule
 	shape.position = Vector2(0, -34)
 	add_child(shape)
-	sprite = PenguinArt.texture("penguin")
-	blink_sprite = PenguinArt.texture("penguin_blink")
-	flying_sprite = PenguinArt.texture("penguin_fly")
+	sprite = AdventureCharacters.frame(character_id)
+	blink_sprite = AdventureCharacters.frame(character_id, "blink")
+	flying_sprite = AdventureCharacters.frame(character_id, "fly")
 	z_index = 5
 
 func can_jump() -> bool:
@@ -93,10 +94,13 @@ func _draw() -> void:
 	var frame := sprite
 	if blink_sprite and fmod(clock, 4.1) < 0.12 and state != State.AIR:
 		frame = blink_sprite
-	elif flying_sprite and state == State.AIR and fmod(clock, 0.24) < 0.12:
+	elif flying_sprite and (state == State.WON or (state == State.AIR and (character_id != "penguin" or fmod(clock, 0.24) < 0.12))):
 		frame = flying_sprite
-	draw_set_transform(Vector2(0, bob - 43), angle, Vector2(facing, 1) * stretch)
-	draw_texture_rect(frame, Rect2(-40, -49, 80, 92), false)
+	draw_set_transform(Vector2(0, bob - 43), angle, Vector2(facing * (-1 if character_id == "whale" else 1), 1) * stretch)
+	var frame_size := Vector2(frame.get_size())
+	var bounds := Vector2(108, 92) if character_id == "whale" else Vector2(86, 92)
+	frame_size *= minf(bounds.x / frame_size.x, bounds.y / frame_size.y)
+	draw_texture_rect(frame, Rect2(Vector2(-frame_size.x * 0.5, 43 - frame_size.y), frame_size), false)
 	draw_set_transform(Vector2.ZERO)
 	if state == State.AIMING and aim.length() > 0.0:
 		var direction := aim.normalized()

@@ -32,7 +32,7 @@ func layout(profile: DifficultyProfile) -> Array[Dictionary]:
 			"amplitude": axis * profile.movement_amplitude if moving else Vector2.ZERO,
 			"period": profile.movement_period + float(i % 3) * 0.45,
 			"phase": float(i) * 0.71,
-			"fish": i > 0 and i % 2 == 1,
+			"star": i > 0 and i % 2 == 1,
 			"goal": i == heights.size() - 1,
 		})
 	return result

@@ -4,6 +4,19 @@ extends RefCounted
 static var cache: Dictionary = {}
 # Atlas regions exclude transparent generator margins without altering source art.
 const REGIONS := {
+	"whale_idle": Rect2(46, 167, 675, 406),
+	"whale_blink": Rect2(769, 167, 676, 407),
+	"whale_fly": Rect2(1488, 107, 660, 406),
+	"capybara_idle": Rect2(115, 84, 562, 577),
+	"capybara_blink": Rect2(794, 84, 561, 577),
+	"capybara_fly": Rect2(1526, 59, 562, 576),
+	"kitten_idle": Rect2(106, 27, 523, 670),
+	"kitten_blink": Rect2(799, 30, 517, 667),
+	"kitten_fly": Rect2(1494, 29, 574, 620),
+	"puppy_idle": Rect2(115, 30, 537, 670),
+	"puppy_blink": Rect2(766, 31, 547, 669),
+	"puppy_fly": Rect2(1499, 23, 580, 632),
+	"star": Rect2(64, 82, 1125, 1075),
 	"penguin": Rect2(228, 108, 846, 1040),
 	"penguin_blink": Rect2(228, 108, 846, 1040),
 	"penguin_fly": Rect2(228, 108, 846, 1040),
@@ -16,7 +29,11 @@ const REGIONS := {
 static func texture(name: String) -> Texture2D:
 	if cache.has(name):
 		return cache[name]
-	var path := "res://assets/art/%s.png" % name
+	var source_name := name
+	for id in ["whale", "capybara", "kitten", "puppy"]:
+		if name.begins_with(id + "_"):
+			source_name = id
+	var path := "res://assets/art/%s.png" % source_name
 	if not ResourceLoader.exists(path):
 		return null
 	var original: Texture2D = load(path)

@@ -53,8 +53,3 @@ func _draw() -> void:
 		draw_texture_rect(texture, Rect2(-width * 0.53, -18.0, width * 1.06, h * 1.06), false)
 	# A soft rim marks the exact physical landing surface across every art variant.
 	draw_line(Vector2(-width / 2.0 + 7.0, 1), Vector2(width / 2.0 - 7.0, 1), Color("f3fff0"), 5.0, true)
-	if goal:
-		draw_line(Vector2(25, 0), Vector2(25, -106), Color("52657c"), 5, true)
-		var wave := sin(time * 3.0) * 5.0
-		draw_colored_polygon(PackedVector2Array([Vector2(27, -106), Vector2(93, -99 + wave), Vector2(88, -60 + wave), Vector2(27, -69)]), Color("efae97"))
-		draw_circle(Vector2(55, -84 + wave * 0.5), 9.0, Color("fff4d9"))
