@@ -64,11 +64,15 @@ def main():
     env["GODOT_ANDROID_KEYSTORE_RELEASE_USER"] = credentials["alias"]
     env["GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD"] = credentials["password"]
     (ROOT / "build").mkdir(exist_ok=True)
-    output = ROOT / "build/JumpingAdventure.apk"
-    run(ENGINE, "--headless", "--path", ROOT, "--export-release", "Android", output, env=env)
+    apk = ROOT / "build/JumpingAdventure.apk"
+    aab = ROOT / "build/JumpingAdventure.aab"
+    run(ENGINE, "--headless", "--path", ROOT, "--export-release", "Android", apk, env=env)
+    run(ENGINE, "--headless", "--path", ROOT, "--export-release", "Android AAB", aab, env=env)
     versions = sorted((SDK / "build-tools").iterdir(), key=lambda p: tuple(int(n) for n in p.name.split(".") if n.isdigit()))
-    run(versions[-1] / "apksigner", "verify", "--verbose", output, env={**env, "JAVA_HOME": str(JDK)})
-    print(f"APK ready: {output} ({output.stat().st_size / 1024**2:.1f} MiB)")
+    run(versions[-1] / "apksigner", "verify", "--verbose", apk, env={**env, "JAVA_HOME": str(JDK)})
+    run(JDK / "bin/jarsigner", "-verify", aab, env={**env, "JAVA_HOME": str(JDK)})
+    print(f"APK ready: {apk} ({apk.stat().st_size / 1024**2:.1f} MiB)")
+    print(f"AAB ready: {aab} ({aab.stat().st_size / 1024**2:.1f} MiB)")
 
 
 if __name__ == "__main__":

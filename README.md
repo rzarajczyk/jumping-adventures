@@ -8,13 +8,13 @@ A 2D Android game about five friends, floating islands, and the ocean. Explore t
 2. Open the APK in the Files app. If prompted, allow that app to install apps from this source.
 3. Tap **Install**, then launch **Jumping Adventure**. Play with the phone in landscape orientation.
 
-The APK is signed with the project's local signing key. Updates signed with the same key can be installed over an existing version while preserving progress. Do not uninstall the game before updating if you want to keep your stars. Version 1.1 updates the original Jumping Penguin app and retains its package ID and signing key. Existing unlocks, audio settings, and scores are migrated: the old fish count becomes the small-star count, and each completed level also receives a point for its finish star. On desktop, the game keeps using the previous Godot data directory, `Godot/app_userdata/Jumping Penguin`.
+The APK is signed with the project's local signing key. The current Android package ID is `pl.zarajczyk.jumpingpenguin`, which differs from earlier releases (`pl.rafal.jumpingpenguin`). Android treats it as a separate app: the older installation and its local progress stay on the phone, and the new installation starts with its own save. Future APK updates for the new package can be installed over it when signed with the same key. On desktop, the game keeps using the previous Godot data directory, `Godot/app_userdata/Jumping Penguin`.
 
 With USB debugging enabled on a connected phone, install and launch the game with:
 
 ```sh
 adb install -r build/JumpingAdventure.apk
-adb shell am start -n pl.rafal.jumpingpenguin/com.godot.game.GodotAppLauncher
+adb shell am start -n pl.zarajczyk.jumpingpenguin/com.godot.game.GodotAppLauncher
 ```
 
 ## How to play
@@ -43,28 +43,30 @@ godot --path .
 
 The helper `python3 tools/bootstrap.py` downloads the official macOS Godot editor 4.7.2 and Android export templates, verifies their SHA512 checksums, and extracts the files needed for Android. The download is about 1.4 GB. This bootstrap helper currently supports macOS; on other operating systems, install the matching Godot editor and export templates for your platform. Do not add `.tools` to the repository or source archive.
 
-## Build an Android APK
+## Build Android APK and AAB
 
 To export Android, install JDK 21 (the templates use Java 17), Android SDK Platform 36, Build Tools 36.1.0, Platform Tools, and accept the SDK licences. Android Studio can install these packages. Install the export templates matching Godot 4.7.2 and configure the Android SDK and Java SDK paths in Godot's Editor Settings. Godot uses the included libraries; the engine is not compiled from C++.
 
-For a manual export on any operating system, open **Project > Export**, select the Android preset, and export the project. This preset points to custom Godot templates under `.tools/templates/`; install the matching Android templates there or update the preset's custom template paths for your machine. The APK is written to `build/JumpingAdventure.apk`.
+For a manual export on any operating system, open **Project > Export** and select **Android** for an APK or **Android AAB** for a Play Store bundle. These presets point to custom Godot templates under `.tools/templates/`; install the matching Android templates there or update the preset's custom template paths for your machine. The files are written to `build/JumpingAdventure.apk` and `build/JumpingAdventure.aab`.
 
-The repeatable command-line build helper is currently configured for macOS and uses Gradle 8.11.1:
+The repeatable command-line build helper is currently configured for macOS and uses Gradle 8.11.1. It exports and verifies both the APK and AAB:
 
 ```sh
 python3 tools/test.py
 python3 tools/build_android.py
 ```
 
-The build helper imports project assets, prepares the Gradle project, exports a release APK, and verifies its signature. Its executable, SDK, and JDK paths can be overridden with `PENGUIN_GODOT`, `PENGUIN_ANDROID_SDK`, and `PENGUIN_JAVA`. The Godot executable used by the helper must use a local `_sc_` data directory under `.tools`.
+The build helper imports project assets, prepares the Gradle project, exports a release APK and AAB, and verifies both signatures. Its executable, SDK, and JDK paths can be overridden with `PENGUIN_GODOT`, `PENGUIN_ANDROID_SDK`, and `PENGUIN_JAVA`. The Godot executable used by the helper must use a local `_sc_` data directory under `.tools`.
 
-The signing key `.tools/jumping-penguin.keystore` and its password file `.tools/signing.json` are created once. **Keep private backups of both files** so future APKs can update existing installations. They are not included in the APK, source archive, or repository. App ID: `pl.rafal.jumpingpenguin`; version: `1.1.0` (version code 2); minimum SDK: 28; target SDK: 36; ABI: `arm64-v8a`.
+The signing key `.tools/jumping-penguin.keystore` and its password file `.tools/signing.json` are created once. **Keep private backups of both files** so future builds can update installations with the same package ID. They are not included in the APK, source archive, or repository. App ID: `pl.zarajczyk.jumpingpenguin`; version: `1.1.0` (version code 2); minimum SDK: 28; target SDK: 36; ABI: `arm64-v8a`.
 
 ## Automated GitHub releases
 
-Once the repository secrets below are configured, every push to `master` builds a signed APK on a macOS runner and publishes a GitHub Release. Releases are tagged `v1.1.N`, where `N` is the workflow run number; each APK gets a monotonically increasing Android version code and a SHA-256 checksum file.
+Once the repository secrets below are configured, every push to `master` builds a signed APK and AAB on a macOS runner and publishes both in a GitHub Release. Releases are tagged `v1.1.N`, where `N` is the workflow run number; each artifact gets a monotonically increasing Android version code and a SHA-256 checksum file. Upload the AAB asset to Play Console; the workflow does not publish directly to Google Play.
 
 Add `ANDROID_KEYSTORE_BASE64` (the keystore encoded as one-line Base64) and `ANDROID_KEYSTORE_PASSWORD` under **Settings > Secrets and variables > Actions** to sign the APK with the existing project key. The workflow uses the key's non-secret alias, `penguin`. Keep the keystore and password private; never commit them.
+
+For a beginner-friendly, Polish walkthrough of publishing on Google Play, see [the Google Play publishing guide](docs/GOOGLE_PLAY_PUBLISHING_PL.md).
 
 ## Project structure and tuning
 

@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   release:
-    name: Build, sign, and publish APK
+    name: Build, sign, and publish APK and AAB
     runs-on: macos-15
     steps:
       - name: Check out source
@@ -46,13 +46,13 @@ jobs:
           path = Path("export_presets.cfg")
           source = path.read_text()
           source, code_matches = re.subn(
-              r"(?m)^version/code=\d+$", f"version/code={version_code}", source, count=1
+              r"(?m)^version/code=\d+$", f"version/code={version_code}", source
           )
           source, name_matches = re.subn(
-              r'(?m)^version/name="[^"]+"$', f'version/name="{version_name}"', source, count=1
+              r'(?m)^version/name="[^"]+"$', f'version/name="{version_name}"', source
           )
-          if code_matches != 1 or name_matches != 1:
-              raise SystemExit("Could not set the Android release version in export_presets.cfg")
+          if code_matches != 2 or name_matches != 2:
+              raise SystemExit("Expected Android APK and AAB presets in export_presets.cfg")
           path.write_text(source)
           Path("build").mkdir(exist_ok=True)
           Path("build/release-version.txt").write_text(version_name + "\n")
@@ -92,7 +92,7 @@ jobs:
           credentials.chmod(0o600)
           PY
 
-      - name: Build and sign APK
+      - name: Build and sign APK and AAB
         run: |
           export PENGUIN_ANDROID_SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
           export PENGUIN_JAVA="$JAVA_HOME"
@@ -107,17 +107,20 @@ jobs:
           VERSION="1.1.${RELEASE_NUMBER}"
           TAG="v${VERSION}"
           APK="build/JumpingAdventure-${VERSION}.apk"
+          AAB="build/JumpingAdventure-${VERSION}.aab"
           cp build/JumpingAdventure.apk "$APK"
+          cp build/JumpingAdventure.aab "$AAB"
           shasum -a 256 "$APK" > "${APK}.sha256"
+          shasum -a 256 "$AAB" > "${AAB}.sha256"
           NOTES="build/release-notes.md"
-          printf 'Automated signed Android build for commit %s.\n\nWorkflow run: %s/%s/actions/runs/%s\n' \
+          printf 'Automated signed Android APK and AAB for commit %s.\n\nWorkflow run: %s/%s/actions/runs/%s\n' \
             "$GITHUB_SHA" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > "$NOTES"
 
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$TAG" "$APK" "${APK}.sha256" --clobber --repo "$GITHUB_REPOSITORY"
+            gh release upload "$TAG" "$APK" "${APK}.sha256" "$AAB" "${AAB}.sha256" --clobber --repo "$GITHUB_REPOSITORY"
             gh release edit "$TAG" --title "Jumping Adventure ${VERSION}" --notes-file "$NOTES" --repo "$GITHUB_REPOSITORY"
           else
-            gh release create "$TAG" "$APK" "${APK}.sha256" \
+            gh release create "$TAG" "$APK" "${APK}.sha256" "$AAB" "${AAB}.sha256" \
               --target "$GITHUB_SHA" \
               --title "Jumping Adventure ${VERSION}" \
               --notes-file "$NOTES" \
