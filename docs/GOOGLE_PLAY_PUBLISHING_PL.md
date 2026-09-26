@@ -62,7 +62,7 @@ Każdy kolejny plik wysyłany do tej samej aplikacji musi mieć większy `versio
 
 Wybierz właściwą aplikację, potem przejdź po zadaniach widocznych na jej panelu. Google może zmieniać nazwy i kolejność sekcji. Trzeba przygotować:
 
-- **Opis i nazwę sklepową.** „Jumping Adventure” ma limit 30 znaków, krótki opis 80, a pełny opis 4000. Przykładowy krótki opis: „Skacz między wyspami, zbieraj gwiazdki i poznawaj pięć zwierzęcych postaci.”
+- **Opis i nazwę sklepową.** „Jumping Adventure” ma limit 30 znaków, krótki opis 80, a pełny opis 4000. Przykładowy krótki opis: „Skacz między wyspami, zbieraj gwiazdki i poznawaj sześć zwierzęcych postaci.”
 - **Grafiki.** Ikona strony sklepu: PNG 512×512 px (maks. 1 MB). Grafika promocyjna: JPEG lub PNG bez przezroczystości 1024×500 px. Dodaj zrzuty ekranu rzeczywistej gry z telefonu; nie pokazuj funkcji, których aplikacja nie ma.
 - **Politykę prywatności.** W repozytorium nie ma jeszcze gotowej polityki prywatności ani linku do niej w grze. Przygotuj prawdziwy, publiczny URL (na przykład na stronie, którą kontrolujesz), dodaj go w Play Console i umieść dostępny z aplikacji link albo tekst. Nawet aplikacja, która nie zbiera danych, potrzebuje polityki i wypełnionego formularza Data safety.
 - **Data safety / Bezpieczeństwo danych.** Odpowiadaj na podstawie faktycznej wersji APK/AAB, w tym bibliotek i SDK. Obecna gra zapisuje postęp lokalnie, nie wysyła go do serwera i nie używa reklam, kont ani analityki; potwierdź jednak formularz zgodnie z listą danych w konkretnej wersji, którą publikujesz.

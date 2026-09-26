@@ -216,6 +216,7 @@ func test_characters_and_migration() -> void:
 	for id in AdventureCharacters.IDS:
 		game.show_characters()
 		var card: Button = game.stage.get_node("Character_" + id)
+		check(Rect2(Vector2.ZERO, game.stage.size).encloses(card.get_rect()), "character card fits on screen " + id)
 		card.pressed.emit()
 		check(save.selected_character == id, "character card selects " + id)
 		save.load_progress()

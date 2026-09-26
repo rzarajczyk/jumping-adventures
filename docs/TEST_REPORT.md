@@ -1,5 +1,11 @@
 # Raport weryfikacji — Jumping Adventure 1.1.0
 
+## Dodanie pandy — 26 września 2026
+
+`python3 tools/test.py`: **1241 sprawdzeń, 0 niepowodzeń**, bez błędów skryptów i zasobów. Testy objęły wszystkie sześć postaci, w tym wybór pandy, zapis i odczyt wyboru, trzy klatki animacji, skok, lądowanie, ponowny start po upadku i zwycięstwo. Dodano sprawdzenie, że każda karta postaci mieści się na ekranie. Wszystkie dziewięć tras ukończono z wynikiem **11/11 gwiazdek**.
+
+Obejrzano zrzuty Godota: menu sześciu postaci w rozdzielczościach 1280×720 i 1600×720 oraz pandę w grze. Pliki: `build/characters.png`, `build/characters-wide.png`, `build/character-panda.png`. W tej aktualizacji sprawdzono projekt na macOS; nie przebudowano APK/AAB ani nie testowano pandy na Androidzie.
+
 ## Aktualizacja z 25 września 2026
 
 APK release `build/JumpingAdventure.apk`, kod wersji 2, nazwa **Jumping Adventure**. Zachowano pakiet `pl.rafal.jumpingpenguin` i klucz podpisujący poprzednią wersję. Godot 4.7.2, Compatibility, ARM64, min SDK 28, target SDK 36.

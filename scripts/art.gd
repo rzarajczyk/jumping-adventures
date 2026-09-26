@@ -16,6 +16,9 @@ const REGIONS := {
 	"puppy_idle": Rect2(115, 30, 537, 670),
 	"puppy_blink": Rect2(766, 31, 547, 669),
 	"puppy_fly": Rect2(1499, 23, 580, 632),
+	"panda_idle": Rect2(134, 15, 513, 702),
+	"panda_blink": Rect2(799, 15, 513, 702),
+	"panda_fly": Rect2(1494, 6, 605, 689),
 	"star": Rect2(64, 82, 1125, 1075),
 	"penguin": Rect2(228, 108, 846, 1040),
 	"penguin_blink": Rect2(228, 108, 846, 1040),
@@ -30,7 +33,7 @@ static func texture(name: String) -> Texture2D:
 	if cache.has(name):
 		return cache[name]
 	var source_name := name
-	for id in ["whale", "capybara", "kitten", "puppy"]:
+	for id in ["whale", "capybara", "kitten", "puppy", "panda"]:
 		if name.begins_with(id + "_"):
 			source_name = id
 	var path := "res://assets/art/%s.png" % source_name

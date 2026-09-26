@@ -1,8 +1,8 @@
 class_name AdventureCharacters
 extends RefCounted
 
-const IDS := ["penguin", "whale", "capybara", "kitten", "puppy"]
-const NAMES := ["Pingwin", "Wieloryb", "Kapibara", "Kotek", "Piesek"]
+const IDS := ["penguin", "whale", "capybara", "kitten", "puppy", "panda"]
+const NAMES := ["Pingwin", "Wieloryb", "Kapibara", "Kotek", "Piesek", "Panda"]
 
 static func valid_id(id: String) -> String:
 	return id if id in IDS else "penguin"

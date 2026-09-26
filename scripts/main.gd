@@ -192,7 +192,7 @@ func show_home() -> void:
 	_label(stage, AdventureCharacters.display_name(Progress.selected_character), Rect2(806, 173, 320, 48), 29, TEAL, true).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var choose := _button(stage, "Zmień postać", Rect2(822, 600, 280, 62), show_characters)
 	choose.name = "ChooseCharacter"
-	_label(stage, "5 przyjaciół   ·   3 krainy   ·   mnóstwo gwiazdek", Rect2(83, 635, 730, 36), 20, INK)
+	_label(stage, "%d przyjaciół   ·   3 krainy   ·   mnóstwo gwiazdek" % AdventureCharacters.IDS.size(), Rect2(83, 635, 730, 36), 20, INK)
 
 func show_characters() -> void:
 	_leave_world()
@@ -201,14 +201,16 @@ func show_characters() -> void:
 	_button(stage, "←  Wróć", Rect2(58, 38, 147, 56), show_home)
 	_label(stage, "Kto dziś wyrusza w przygodę?", Rect2(64, 126, 1150, 70), 44, INK, true)
 	_label(stage, "Każdy skacze tak samo dobrze. Wybierz swojego przyjaciela!", Rect2(67, 197, 1140, 36), 22, MUTED)
+	var card_gap := 14.0
+	var card_width := (stage.size.x - 96.0 - card_gap * (AdventureCharacters.IDS.size() - 1)) / AdventureCharacters.IDS.size()
 	for i in AdventureCharacters.IDS.size():
 		var id: String = AdventureCharacters.IDS[i]
 		var selected := id == Progress.selected_character
-		var card := _button(stage, "", Rect2(48 + i * 238, 268, 224, 303), func(): Progress.select_character(id); show_characters(), selected)
+		var card := _button(stage, "", Rect2(48 + i * (card_width + card_gap), 268, card_width, 303), func(): Progress.select_character(id); show_characters(), selected)
 		card.name = "Character_" + id
-		_character_picture(card, id, Rect2(30, 24, 164, 174))
-		_label(card, AdventureCharacters.NAMES[i], Rect2(10, 209, 204, 40), 27, CREAM if selected else INK, true).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		_label(card, "✓  Wybrano" if selected else "Wybierz mnie", Rect2(10, 256, 204, 30), 18, CREAM if selected else MUTED).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_character_picture(card, id, Rect2(20, 24, card_width - 40, 174))
+		_label(card, AdventureCharacters.NAMES[i], Rect2(10, 209, card_width - 20, 40), 27, CREAM if selected else INK, true).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_label(card, "✓  Wybrano" if selected else "Wybierz mnie", Rect2(10, 256, card_width - 20, 30), 18, CREAM if selected else MUTED).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_button(stage, "Ruszamy!   →", Rect2(430, 614, 420, 64), show_levels, true)
 
 func show_levels() -> void:

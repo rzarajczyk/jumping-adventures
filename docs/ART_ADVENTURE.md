@@ -26,7 +26,12 @@ Use case: illustration-story. Production sprite sheet for kawaii children's game
 
 Pierwszy wariant z referencją pingwina został odrzucony, ponieważ miał dziób. Finalny wieloryb powstał bez obrazu referencyjnego; w grze jest odbijany w poziomie, aby patrzył w kierunku skoku.
 
+## panda.png
+
+Wbudowane narzędzie imagegen. Referencja stylu i układu: `assets/art/puppy.png`. Finalny arkusz: `assets/art/panda.png`, 2172×724, RGBA. Trzy klatki: idle, blink, fly. Oryginalny kanał alfa zachowany; regiony w `scripts/art.gd` obejmują sylwetki z marginesem 8 px.
+
+Use case: illustration-story. Asset type: production 2D game character sprite sheet for Jumping Adventure. Create a matching PANDA sprite sheet by replacing the puppy subject in the supplied sprite sheet with a cute baby giant panda; the supplied puppy is a STYLE AND LAYOUT REFERENCE only. Match the reference's kawaii storybook painted texture, soft detailed fur, gentle outlines, creamy highlights, rosy cheeks, big friendly dark eyes, compact chibi proportions, and mint scarf. Subject: an unmistakable black-and-white baby giant panda, round cream-white head and tummy, round black ears, black oval eye patches, tiny black nose, black arms and legs, tiny round tail. No beak. Three consistent frames of the SAME panda in one horizontal row of THREE equal square cells: LEFT relaxed standing panda with open eyes and a small happy smile; MIDDLE exactly the same standing pose and proportions but eyes closed in a blink; RIGHT happy airborne leap facing right, forepaws reaching forward and feet lifted, scarf fluttering. Face slightly right in three-quarter view in every frame. Maintain consistent head and body size, each character entirely inside its own cell with generous transparent margins. Landscape 3:1 canvas, ideally 2172x724 or 1536x512. Preserve actual alpha transparency. No background, ground, cast shadows, bamboo, props, letters, grid lines, borders, or watermarks.
+
 ## star.png
 
 Use case: illustration-story. Production collectible sprite for a pastel kawaii children's jumping game. One single golden five-pointed star, with softly rounded points, warm apricot shaded edges and cream highlight, tiny cute smiling face, polished storybook painted style. The star itself should fill the central 75% of a square canvas, isolated on true transparent alpha background. No glow outside the silhouette, no shadows, no sparkles, no scene, no text. Readable both as a 36px collectible and a large 130px finish star.
-

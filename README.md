@@ -1,6 +1,6 @@
 # Jumping Adventure
 
-A 2D Android game about five friends, floating islands, and the ocean. Explore three hand-designed routes across three difficulty levels, with original kawaii artwork, animation, music, and sound effects. The game works completely offline.
+A 2D Android game about six friends, floating islands, and the ocean. Explore three hand-designed routes across three difficulty levels, with original kawaii artwork, animation, music, and sound effects. The game works completely offline.
 
 ## Install on Android
 
@@ -19,7 +19,7 @@ adb shell am start -n pl.zarajczyk.jumpingpenguin/com.godot.game.GodotAppLaunche
 
 ## How to play
 
-- Choose a character: penguin, whale, capybara, kitten, or puppy. Your choice is saved. All characters use the same physics and have three animation frames.
+- Choose a character: penguin, whale, capybara, kitten, puppy, or panda. Your choice is saved. All characters use the same physics and have three animation frames.
 - Choose a difficulty and an unlocked level.
 - Drag in the direction you want to jump, usually up and to the right. A longer drag applies more force. Release to jump.
 - Start a drag anywhere outside the buttons. Moving your finger back to the starting point or dragging downward cancels the jump.
