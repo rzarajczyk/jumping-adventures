@@ -65,4 +65,27 @@ for i in range(int(RATE * 0.6)):
     smoothed = smoothed * 0.75 + rng.uniform(-1, 1) * 0.25
     splash.append((smoothed * 0.5 + math.sin(2 * math.pi * (140 * t - 75 * t * t)) * 0.15) * math.exp(-t * 8) * min(1, t / 0.015))
 save("splash", splash)
-print("Created original music loop and six effects.")
+# Three pearl-like notes as an artifact fills the HUD.
+artifact = [0.0] * int(RATE * 0.65)
+for i, pitch in enumerate([79, 84, 88]):
+    note(artifact, i * 0.1, 0.38, pitch, 0.25, True)
+save("artifact", artifact)
+
+# A brief soft air puff followed by a rising whistle: one impulse, not an engine.
+super_jump = []
+wind_rng = random.Random(219)
+wind_noise = 0.0
+for i in range(int(RATE * 0.42)):
+    t = i / RATE
+    wind_noise = wind_noise * 0.8 + wind_rng.uniform(-1, 1) * 0.2
+    puff = wind_noise * 0.5 * math.exp(-t * 13)
+    whistle = math.sin(2 * math.pi * (260 * t + 850 * t * t))
+    super_jump.append((puff + whistle * 0.23) * math.sin(math.pi * t / 0.42))
+save("super_jump", super_jump)
+
+# A rounded little bell, with a quick downward shimmer.
+anchor = [0.0] * int(RATE * 0.48)
+note(anchor, 0.0, 0.4, 88, 0.24, True)
+note(anchor, 0.065, 0.32, 76, 0.15, True)
+save("anchor", anchor)
+print("Created original music loop and nine effects.")

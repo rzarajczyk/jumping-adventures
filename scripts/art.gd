@@ -4,6 +4,9 @@ extends RefCounted
 static var cache: Dictionary = {}
 # Atlas regions exclude transparent generator margins without altering source art.
 const REGIONS := {
+	"wind_bottle": Rect2(144, 42, 1021, 1173),
+	"anchor": Rect2(136, 37, 982, 1188),
+	"cloud_pack": Rect2(149, 66, 995, 1124),
 	"whale_idle": Rect2(46, 167, 675, 406),
 	"whale_blink": Rect2(769, 167, 676, 407),
 	"whale_fly": Rect2(1488, 107, 660, 406),

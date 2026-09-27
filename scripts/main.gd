@@ -29,6 +29,13 @@ var menu_clock: float = 0.0
 var hero_base_y: float = 239.0
 var pause_overlay := false
 var application_suspended := false
+var wind_button: PowerButton
+var anchor_button: PowerButton
+var power_multiplier: Label
+var power_hint: Panel
+var power_hint_label: Label
+var power_hint_time: float = 0.0
+var power_hud_effects: PowerHudEffects
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -90,6 +97,13 @@ func _clear() -> void:
 	hint_panel = null
 	splash_label = null
 	pause_overlay = false
+	wind_button = null
+	anchor_button = null
+	power_multiplier = null
+	power_hint = null
+	power_hint_label = null
+	power_hint_time = 0.0
+	power_hud_effects = null
 
 func _leave_world() -> void:
 	get_tree().paused = false
@@ -249,7 +263,10 @@ func start_level(index: int) -> void:
 	world.stars_changed.connect(_stars_changed)
 	world.completed.connect(_won)
 	world.island_reached.connect(_island_reached)
+	world.powers_changed.connect(_sync_powers)
+	world.artifact_collected.connect(_artifact_collected)
 	world.retry_started.connect(func(): if is_instance_valid(hint_panel): hint_panel.visible = level_index == 0)
+	world.retry_started.connect(_reset_power_hud)
 	add_child(world)
 	_build_hud()
 
@@ -285,9 +302,57 @@ func _build_hud() -> void:
 	power_bar.add_theme_stylebox_override("fill", _box(TEAL, 6, false))
 	stage.add_child(power_bar)
 	power_bar.visible = false
+	power_multiplier = _label(stage, "×2", Rect2(831, 643, 65, 43), 27, AdventurePowers.WIND_COLOR, true)
+	power_multiplier.visible = false
+	wind_button = _power_button(AdventurePowers.Kind.WIND, Vector2(44, 574), "WindButton")
+	anchor_button = _power_button(AdventurePowers.Kind.ANCHOR, Vector2(1048, 574), "AnchorButton")
+	wind_button.pressed.connect(func():
+		if world.toggle_super_jump(): Sound.effect("tap")
+	)
+	anchor_button.pressed.connect(func(): world.use_anchor())
+	power_hint = _panel(stage, Rect2(354, 548, 572, 92), Color(1, 0.995, 0.97, 0.96), 22)
+	power_hint_label = _label(power_hint, "", Rect2(25, 15, 522, 64), 22, INK, true)
+	power_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	power_hint.visible = false
+	power_hud_effects = PowerHudEffects.new()
+	stage.add_child(power_hud_effects)
+	_sync_powers()
 	splash_label = _label(stage, "Plusk! Spróbuj jeszcze raz…", Rect2(280, 286, 720, 65), 38, INK, true)
 	splash_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	splash_label.visible = false
+
+func _power_button(kind: AdventurePowers.Kind, at: Vector2, node_name: String) -> PowerButton:
+	var button := PowerButton.new()
+	button.name = node_name
+	button.kind = kind
+	button.ui_font = bold
+	button.position = at
+	button.size = Vector2(188, 110)
+	stage.add_child(button)
+	return button
+
+func _sync_powers() -> void:
+	if not is_instance_valid(world) or not is_instance_valid(wind_button):
+		return
+	wind_button.update_state(world.powers.wind, world.powers.armed, world.can_arm_wind(), false)
+	anchor_button.update_state(world.powers.anchor, false, world.can_use_anchor(), world.powers.anchor_used)
+	var fill := power_bar.get_theme_stylebox("fill") as StyleBoxFlat
+	var color := AdventurePowers.WIND_COLOR if world.powers.armed else TEAL
+	if fill.bg_color != color: fill.bg_color = color
+
+func _artifact_collected(kind: AdventurePowers.Kind, at: Vector2) -> void:
+	if not is_instance_valid(power_hint): return
+	var wind := kind == AdventurePowers.Kind.WIND
+	power_hint_label.text = "Włącz plecak i skocz\ndwa razy dalej!" if wind else "Dotknij kotwiczki w locie,\nżeby opaść pionowo"
+	power_hint_time = 4.5
+	var button := wind_button if wind else anchor_button
+	var screen_at := world.get_canvas_transform() * at - stage.position
+	power_hud_effects.send(screen_at, button.position + Vector2(88, 83), AdventurePowers.WIND_COLOR if wind else AdventurePowers.ANCHOR_COLOR)
+
+func _reset_power_hud() -> void:
+	power_hint_time = 0.0
+	if is_instance_valid(power_hud_effects): power_hud_effects.motes.clear()
+	if is_instance_valid(hint_panel): hint_panel.visible = level_index == 0
 
 func _stars_changed(count: int) -> void:
 	if is_instance_valid(star_label):
@@ -408,10 +473,18 @@ func _process(delta: float) -> void:
 	if is_instance_valid(hero):
 		hero.position.y = hero_base_y + sin(menu_clock * 2.0) * 5.0
 	if is_instance_valid(world):
+		_sync_powers()
+		if not get_tree().paused: power_hint_time = maxf(0.0, power_hint_time - delta)
+		if is_instance_valid(power_hint):
+			power_hint.visible = power_hint_time > 0.0 and not pause_overlay and world.splash_time < 0.0 and not world.finished
+			if power_hint.visible: hint_panel.visible = false
+			elif power_hint_time <= 0.0 and world.splash_time < 0.0:
+				hint_panel.visible = level_index == 0 and world.furthest < 3 and not world.finished
 		backdrop.scroll = world.camera.position.x - get_viewport_rect().size.x * 0.5
 		if is_instance_valid(power_bar):
 			power_bar.visible = world.gesture.pointer != -99 and not pause_overlay
 			power_bar.value = world.player.aim.length() / JumpGesture.MAX_SPEED * 100
+			power_multiplier.visible = power_bar.visible and world.powers.armed
 		if is_instance_valid(splash_label):
 			splash_label.visible = world.splash_time >= 0.0
 			if splash_label.visible and is_instance_valid(hint_panel): hint_panel.visible = false

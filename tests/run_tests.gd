@@ -61,6 +61,7 @@ func _run() -> void:
 		for l in 3:
 			await test_route(d, l)
 	await test_fail_and_ui()
+	await preload("res://tests/test_powers.gd").new().run(self)
 	DirAccess.remove_absolute("res://build/test-progress.cfg")
 	print("RESULT: %d checks, %d failures" % [checks, failures.size()])
 	for failure in failures: print("  " + failure)
@@ -74,6 +75,7 @@ func test_route(d: int, l: int) -> void:
 	root.add_child(world)
 	await frames(5)
 	check(world.islands.size() == 21 and world.stars.size() == 10, "route content %d/%d" % [d, l])
+	check(world.artifacts.size() == 2 and world.artifacts[0].island.index == 2 and world.artifacts[1].island.index == 4, "artifact placements %d/%d" % [d, l])
 	check(world.player.can_jump(), "spawn stands on first island %d/%d" % [d, l])
 	for index in range(1, 21):
 		var island := world.islands[index]
@@ -105,6 +107,7 @@ func test_route(d: int, l: int) -> void:
 			await frames(6)
 	check(world.finished, "route completed %d/%d" % [d, l])
 	check(world.star_count == 11, "ten stars and finish star collectible %d/%d" % [d, l])
+	check(world.powers.wind == 3 and world.powers.anchor == 3, "ordinary route collects both artifacts without consuming powers %d/%d" % [d, l])
 	print("Route %s / %s: finished=%s, stars=%d" % [PROFILE_PATHS[d], LEVEL_PATHS[l], world.finished, world.star_count])
 	root.remove_child(world)
 	world.queue_free()

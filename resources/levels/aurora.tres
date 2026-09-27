@@ -3,6 +3,8 @@
 [resource]
 script = ExtResource("1")
 id = 2
+wind_island = 2
+anchor_island = 4
 title = "Zorza nad Oceanem"
 subtitle = "Jeszcze jeden skok do gwiazd"
 art = "aurora"

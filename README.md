@@ -23,7 +23,10 @@ adb shell am start -n pl.zarajczyk.jumpingpenguin/com.godot.game.GodotAppLaunche
 - Choose a difficulty and an unlocked level.
 - Drag in the direction you want to jump, usually up and to the right. A longer drag applies more force. Release to jump.
 - Start a drag anywhere outside the buttons. Moving your finger back to the starting point or dragging downward cancels the jump.
-- The arrow and meter show the direction and strength. There is no trajectory preview or in-air control.
+- The arrow and meter show the direction and strength. There is no trajectory preview.
+- Collect the Bottle of Mischievous Wind above island 3 to receive three super-jumps. Tap **Super-skok**, then aim and release normally: the same gesture gives twice the height and same-height range. A purple arrow, meter, and **×2** mark the armed jump. Tap again, cancel the gesture, or pause to disarm without spending a charge.
+- Collect the Amber Anchor above island 5 for three flight interruptions. Tap **Kotwiczka** while airborne to stop all momentum and fall straight down under normal gravity. It can be used once per flight, including after a super-jump. Moving islands continue moving underneath you.
+- Each power button has three pearls showing its remaining charges. Powers are optional, work identically for every character, and reset on a new attempt or level. Collectibles return after a retry. Pausing preserves unused charges.
 - Islands keep moving while you aim. Falling into the water restarts the current level. Attempts are unlimited.
 - Each route has 10 small stars. Touch the large star on the final island to collect the eleventh star and finish the level. Landing on the final island alone is not enough.
 - The finish shows animated fireworks, confetti, and a victory screen with your character and star count. Levels unlock separately for each difficulty.
@@ -73,12 +76,13 @@ For a beginner-friendly, Polish walkthrough of publishing on Google Play, see [t
 - `scripts/gesture.gd`: 16-unit dead zone, full force at a 240-unit drag, maximum speed 850. Coordinates account for Godot viewport scaling.
 - `scripts/penguin.gd`: `CharacterBody2D`, gravity 1200, physics at 60 Hz, and no carry-over of island velocity when jumping.
 - `scripts/world.gd`: level flow, sinusoidal island motion, stars, resets, camera, and finish goal.
+- `scripts/powers.gd`: per-attempt power inventory and arming. `scripts/power_effects.gd`, `scripts/power_button.gd`, and `scripts/power_hud_effects.gd`: cloud/anchor effects, touch controls, and collection pearls. The camera zooms out for a boosted jump's predicted apex while keeping the ocean line stationary.
 - `resources/levels`: three route definitions. `resources/difficulties`: island widths, gaps, and movement for easy, medium, and hard. Adjust the balance without editing the UI.
 - `scripts/main.gd`: Polish-language UI, pause handling, safe margins, and app background handling.
 - `scripts/characters.gd`: character catalog. `scripts/fireworks.gd`: animated fireworks and confetti.
 - `scripts/progress.gd`: local save at `user://progress.cfg`, separate progress for each difficulty, written through a temporary file.
 - `assets/art`: original PNG artwork, including three penguin frames. `docs/ART_ADVENTURE.md` contains the prompts used with the built-in image generator.
-- `tools/generate_audio.py`: reproducible generator for the original 40-second music loop and six sound effects; it uses only the Python standard library.
+- `tools/generate_audio.py`: reproducible generator for the original 40-second music loop and nine sound effects; it uses only the Python standard library.
 
 When replacing an original PNG, update its `AtlasTexture` regions in `scripts/art.gd`. The bright rim marks each island's physical landing surface. The game uses the Compatibility renderer.
 
@@ -93,6 +97,8 @@ godot --path . --script tests/capture.gd
 ```
 
 See `docs/TEST_REPORT.md` for detailed results, tested devices, and limitations.
+
+Power-specific physics, charge, input, and camera checks are included in the same test command. To capture the artifacts, all six equipped characters, boost/anchor animations, and camera framing, run `godot --path . --script tests/capture_powers.gd`. Images are written to `build/powers-*.png`. Original power-art prompts are recorded in `docs/ART_POWERS.md`.
 
 ## Assets and licences
 

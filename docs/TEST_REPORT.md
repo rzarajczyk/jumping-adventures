@@ -1,5 +1,21 @@
 # Raport weryfikacji — Jumping Adventure 1.1.0
 
+## Podniebny podróżnik — 27 września 2026
+
+`python3 tools/test.py`: **1360 sprawdzeń, 0 niepowodzeń**, bez błędów skryptów i zasobów. Wszystkie dziewięć tras ukończono zwykłymi skokami z wynikiem **11/11 gwiazdek**, zbierając oba artefakty i zachowując po trzy niewykorzystane ładunki.
+
+Testy mocy mierzą rzeczywistą fizykę przy 60 Hz: dla wektora `(300, -600)` zwykły skok osiągnął wysokość **145,03** i zasięg **300,04**, a skok z mnożnikiem √2 — **293,00** i **593,98** jednostek. Niewielkie odchylenie od dokładnego ×2 wynika z dyskretnej integracji i momentu wykrycia lądowania. Sprawdzono maksymalne wybicie, brak przenikania platform, widoczność postaci pod HUD-em i nieruchomą ekranową linię oceanu podczas oddalania kamery.
+
+Sprawdzono po trzy użycia, anulowanie gestu, uzbrajanie i rozbrajanie, blokadę drugiego palca, puszczenie gestu nad przyciskiem, aktywację kotwiczki przy naciśnięciu, przerwanie wznoszenia/szczytu/opadania, jedną kotwiczkę na lot, połączenie obu mocy i lądowanie na ruchomej wyspie. Zweryfikowano reset po wodzie, ręcznym restarcie i zmianie planszy, zachowanie ładunków po pauzie i powrocie z tła oraz zatrzymanie podpowiedzi i animacji perełek podczas pauzy. Wszystkie sześć postaci wykonało super-skok, użyło kotwiczki i wylądowało.
+
+Kontrola wizualna w Godot: artefakty, wszystkie sześć postaci z akcesoriami, uzbrojona strzałka i pasek ×2, chmurkowy start, linka i fala kotwiczki oraz maksymalny skok na trudnej trasie. Zrzuty 1280×720 i 1600×720: `build/powers-*.png`; odtwarzalny scenariusz: `tests/capture_powers.gd`. Nowe tekstury mają mipmapy, aby zachować gładkie krawędzie przy rozmiarach 16–56 jednostek.
+
+`python3 tools/build_android.py` zakończył się sukcesem. Utworzono podpisane `build/JumpingAdventure.apk` (**94,3 MiB**) i `build/JumpingAdventure.aab` (**45,3 MiB**), pakiet `pl.zarajczyk.jumpingpenguin`, z dotychczasowym kluczem. Weryfikacja podpisów zakończyła się powodzeniem. Nie publikowano wydania ani nie zmieniano numeru wersji.
+
+APK zainstalowano i uruchomiono na emulatorze **Pixel 10, ARM64, Android 37, ekran 2424×1080**. Gestami Androida zebrano butelkę i kotwiczkę, potwierdzono napełnienie perełek i obie podpowiedzi. Użyto super-skoku, następnie połączono kolejny super-skok z kotwiczką i bezpiecznym lądowaniem. Liczniki potwierdziły zużycie po jednym ładunku obu mocy, a kamera wróciła do zwykłego widoku. Efekty są rozpoznawalne wizualnie przy wyciszonym emulatorze. Zrzuty: `build/powers-android-bottle.png`, `build/powers-android-anchor-collected.png`, `build/powers-android-combo-success.png`, `build/powers-android-combo-landed.png`. Logi: `build/powers-android-logcat.txt`.
+
+**Nie było podłączonego fizycznego telefonu.** Nie potwierdzono wygody palca na rzeczywistym ekranie, wydajności telefonu, odsłuchu nowych dźwięków ani balansu w testach z dziećmi. Przebieg w emulatorze nie stanowi pomiaru FPS na urządzeniu.
+
 ## Dodanie pandy — 26 września 2026
 
 `python3 tools/test.py`: **1241 sprawdzeń, 0 niepowodzeń**, bez błędów skryptów i zasobów. Testy objęły wszystkie sześć postaci, w tym wybór pandy, zapis i odczyt wyboru, trzy klatki animacji, skok, lądowanie, ponowny start po upadku i zwycięstwo. Dodano sprawdzenie, że każda karta postaci mieści się na ekranie. Wszystkie dziewięć tras ukończono z wynikiem **11/11 gwiazdek**.

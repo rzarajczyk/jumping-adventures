@@ -10,6 +10,8 @@ extends Resource
 @export var gaps: PackedFloat32Array
 @export var widths: PackedFloat32Array
 @export var motion_axes: PackedInt32Array
+@export var wind_island: int = 2
+@export var anchor_island: int = 4
 
 func layout(profile: DifficultyProfile) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
@@ -34,5 +36,6 @@ func layout(profile: DifficultyProfile) -> Array[Dictionary]:
 			"phase": float(i) * 0.71,
 			"star": i > 0 and i % 2 == 1,
 			"goal": i == heights.size() - 1,
+			"artifact": AdventurePowers.Kind.WIND if i == wind_island else (AdventurePowers.Kind.ANCHOR if i == anchor_island else AdventurePowers.Kind.NONE),
 		})
 	return result
