@@ -3,8 +3,8 @@
 [resource]
 script = ExtResource("1")
 id = 1
-wind_island = 2
-anchor_island = 4
+wind_island = 5
+anchor_island = 1
 title = "Kryształowe Wyspy"
 subtitle = "Wśród błękitnych iskier"
 art = "crystal"

@@ -9,6 +9,7 @@ var checks: int = 0
 var failures: Array[String] = []
 const LEVEL_PATHS := ["garden", "crystal", "aurora"]
 const PROFILE_PATHS := ["easy", "medium", "hard"]
+const ARTIFACT_PLACEMENTS: Array[Vector2i] = [Vector2i(2, 4), Vector2i(5, 1), Vector2i(3, 4)]
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -75,7 +76,13 @@ func test_route(d: int, l: int) -> void:
 	root.add_child(world)
 	await frames(5)
 	check(world.islands.size() == 21 and world.stars.size() == 10, "route content %d/%d" % [d, l])
-	check(world.artifacts.size() == 2 and world.artifacts[0].island.index == 2 and world.artifacts[1].island.index == 4, "artifact placements %d/%d" % [d, l])
+	var wind_index := -1
+	var anchor_index := -1
+	for artifact in world.artifacts:
+		if artifact.kind == AdventurePowers.Kind.WIND: wind_index = artifact.island.index
+		elif artifact.kind == AdventurePowers.Kind.ANCHOR: anchor_index = artifact.island.index
+	var expected := ARTIFACT_PLACEMENTS[l]
+	check(world.artifacts.size() == 2 and wind_index == expected.x and anchor_index == expected.y, "artifact placements %d/%d" % [d, l])
 	check(world.player.can_jump(), "spawn stands on first island %d/%d" % [d, l])
 	for index in range(1, 21):
 		var island := world.islands[index]
