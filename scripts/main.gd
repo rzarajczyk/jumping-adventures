@@ -498,17 +498,17 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	# Complete a gesture even when the finger ends on top of a HUD button.
 	if is_instance_valid(world) and not get_tree().paused and world.gesture.pointer != -99:
-		if event is InputEventScreenTouch and not event.pressed:
+		if event is InputEventScreenTouch and not event.pressed and event.index == world.gesture.pointer:
 			if event.canceled and event.index == world.gesture.pointer: world.cancel_gesture()
 			else: world._end(event.index, event.position)
 			get_viewport().set_input_as_handled()
-		elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed and world.gesture.pointer == -1:
 			world._end(-1, event.position)
 			get_viewport().set_input_as_handled()
-		elif event is InputEventScreenDrag:
+		elif event is InputEventScreenDrag and event.index == world.gesture.pointer:
 			world._drag(event.index, event.position)
 			get_viewport().set_input_as_handled()
-		elif event is InputEventMouseMotion:
+		elif event is InputEventMouseMotion and world.gesture.pointer == -1:
 			world._drag(-1, event.position)
 			get_viewport().set_input_as_handled()
 
@@ -521,5 +521,10 @@ func _notification(what: int) -> void:
 		application_suspended = false
 		Sound.suspend_audio(false)
 	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
-		if is_instance_valid(world): pause_game()
+		if is_instance_valid(world):
+			if world.finished: show_levels()
+			elif pause_overlay: resume_game()
+			else: pause_game()
 		elif screen in ["levels", "characters"]: show_home()
+		elif is_instance_valid(modal): _close_overlay()
+		else: get_tree().quit()

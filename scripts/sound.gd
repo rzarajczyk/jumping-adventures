@@ -12,7 +12,7 @@ func _ready() -> void:
 		var stream: AudioStreamWAV = load("res://assets/audio/music.wav")
 		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
 		stream.loop_begin = 0
-		stream.loop_end = stream.data.size() / (4 if stream.stereo else 2)
+		stream.loop_end = roundi(stream.get_length() * stream.mix_rate)
 		music.stream = stream
 		music.volume_db = -17.0
 	for i in 6:
