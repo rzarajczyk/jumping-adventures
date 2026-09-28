@@ -5,6 +5,9 @@ const MUTED := Color("68818c")
 const CREAM := Color("fffdf6")
 const TEAL := Color("398b82")
 const GOLD := Color("e7ae55")
+const ONE_PLAYER_ICON := preload("res://assets/ui/one_player.svg")
+const TWO_PLAYERS_ICON := preload("res://assets/ui/two_players.svg")
+const RaceEmulatorDemo := preload("res://scripts/race_emulator_demo.gd")
 const LEVELS: Array[LevelDefinition] = [preload("res://resources/levels/garden.tres"), preload("res://resources/levels/crystal.tres"), preload("res://resources/levels/aurora.tres")]
 const PROFILES: Array[DifficultyProfile] = [preload("res://resources/difficulties/easy.tres"), preload("res://resources/difficulties/medium.tres"), preload("res://resources/difficulties/hard.tres")]
 
@@ -36,6 +39,8 @@ var power_hint: Panel
 var power_hint_label: Label
 var power_hint_time: float = 0.0
 var power_hud_effects: PowerHudEffects
+var race_menu: RaceMenu
+var race_emulator_demo: Node
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -61,6 +66,10 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_layout)
 	_layout()
 	show_home()
+	if OS.is_debug_build() and FileAccess.file_exists(RaceEmulatorDemo.CONFIG_PATH):
+		race_emulator_demo = RaceEmulatorDemo.new()
+		race_emulator_demo.app = self
+		add_child(race_emulator_demo)
 	# Explicit developer switches for reproducible screenshots and smoke tests.
 	if OS.has_feature("debug"):
 		for arg in OS.get_cmdline_user_args():
@@ -178,16 +187,42 @@ func _picture(parent: Node, art: String, rect: Rect2) -> TextureRect:
 	view.size = rect.size
 	return view
 
+func _home_play_button(text: String, texture: Texture2D, rect: Rect2, action: Callable) -> Button:
+	var button := _button(stage, text, rect, action, true)
+	button.add_theme_font_size_override("font_size", 29)
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		var style: StyleBoxFlat = button.get_theme_stylebox(state).duplicate()
+		style.set_corner_radius_all(24)
+		style.content_margin_top = 72
+		style.content_margin_bottom = 15
+		style.content_margin_left = 16
+		style.content_margin_right = 16
+		button.add_theme_stylebox_override(state, style)
+	var icon := TextureRect.new()
+	icon.texture = texture
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.position = Vector2((rect.size.x - 80) * 0.5, 11)
+	icon.size = Vector2(80, 60)
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	button.add_child(icon)
+	return button
+
 func _character_picture(parent: Node, id: String, rect: Rect2) -> TextureRect:
 	var view := _picture(parent, "penguin", rect)
 	view.texture = AdventureCharacters.frame(id)
 	return view
 
 func show_home() -> void:
+	if is_instance_valid(race_menu):
+		race_menu.shutdown()
+		remove_child(race_menu)
+		race_menu.queue_free()
+		race_menu = null
 	_leave_world()
 	_clear()
 	screen = "home"
-	_panel(stage, Rect2(65, 120, 625, 465), Color(1, 0.995, 0.966, 0.92), 34)
+	_panel(stage, Rect2(65, 120, 625, 526), Color(1, 0.995, 0.966, 0.92), 34)
 	_picture(stage, "star", Rect2(68, 38, 42, 44))
 	_label(stage, "JUMPING ADVENTURE", Rect2(120, 40, 470, 44), 24, INK, true)
 	_button(stage, "Dźwięk", Rect2(1092, 34, 128, 54), show_settings)
@@ -195,9 +230,10 @@ func show_home() -> void:
 	_label(stage, "Wielka przygoda\nmałych przyjaciół.", Rect2(98, 195, 580, 165), 48, INK, true)
 	_label(stage, "Skacz po wyspach. Zbieraj gwiazdki!", Rect2(102, 367, 565, 40), 23, MUTED)
 	for i in 3:
-		var b := _button(stage, PROFILES[i].title, Rect2(101 + i * 178, 425, 164, 56), func(): difficulty = i; show_home(), difficulty == i)
+		var b := _button(stage, PROFILES[i].title, Rect2(101 + i * 194, 414, 164, 52), func(): difficulty = i; show_home(), difficulty == i)
 		b.name = "Difficulty%d" % i
-	_button(stage, "Start   →", Rect2(101, 501, 520, 62), show_levels, true)
+	_home_play_button("Start", ONE_PLAYER_ICON, Rect2(101, 486, 267, 132), show_levels).name = "StartButton"
+	_home_play_button("Graj we dwoje", TWO_PLAYERS_ICON, Rect2(386, 486, 267, 132), show_multiplayer).name = "MultiplayerButton"
 	_picture(stage, "garden", Rect2(756, 483, 422, 150))
 	hero_base_y = 239
 	hero = _character_picture(stage, Progress.selected_character, Rect2(834, hero_base_y, 248, 277))
@@ -206,7 +242,15 @@ func show_home() -> void:
 	_label(stage, AdventureCharacters.display_name(Progress.selected_character), Rect2(806, 173, 320, 48), 29, TEAL, true).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var choose := _button(stage, "Zmień postać", Rect2(822, 600, 280, 62), show_characters)
 	choose.name = "ChooseCharacter"
-	_label(stage, "%d przyjaciół   ·   3 krainy   ·   mnóstwo gwiazdek" % AdventureCharacters.IDS.size(), Rect2(83, 635, 730, 36), 20, INK)
+	_label(stage, "%d przyjaciół   ·   3 krainy   ·   mnóstwo gwiazdek" % AdventureCharacters.IDS.size(), Rect2(83, 664, 730, 36), 20, INK)
+
+func show_multiplayer() -> void:
+	_leave_world()
+	_clear()
+	screen = "multiplayer"
+	race_menu = RaceMenu.new()
+	race_menu.app = self
+	add_child(race_menu)
 
 func show_characters() -> void:
 	_leave_world()
@@ -356,7 +400,7 @@ func _reset_power_hud() -> void:
 
 func _stars_changed(count: int) -> void:
 	if is_instance_valid(star_label):
-		star_label.text = "%d / 11" % count
+		star_label.text = "%d / %d" % [count, 10 if world is RaceWorld else 11]
 
 func _island_reached(index: int) -> void:
 	if is_instance_valid(progress_bar):
@@ -394,6 +438,9 @@ func _close_overlay() -> void:
 	modal = null
 
 func pause_game() -> void:
+	if world is RaceWorld:
+		Race.request_pause()
+		return
 	if not is_instance_valid(world) or world.finished or pause_overlay:
 		return
 	world.cancel_gesture()
@@ -408,6 +455,9 @@ func pause_game() -> void:
 	_button(ui, "Dźwięk", Rect2(515, 524, 250, 54), show_settings)
 
 func resume_game() -> void:
+	if world is RaceWorld:
+		Race.set_ready()
+		return
 	if application_suspended:
 		return
 	_close_overlay()
@@ -491,6 +541,10 @@ func _process(delta: float) -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		if is_instance_valid(race_menu) and not is_instance_valid(world):
+			show_home()
+			get_viewport().set_input_as_handled()
+			return
 		if is_instance_valid(world):
 			if pause_overlay: resume_game()
 			else: pause_game()
@@ -521,6 +575,10 @@ func _notification(what: int) -> void:
 		application_suspended = false
 		Sound.suspend_audio(false)
 	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		if is_instance_valid(race_menu):
+			if world is RaceWorld: Race.request_pause()
+			else: show_home()
+			return
 		if is_instance_valid(world):
 			if world.finished: show_levels()
 			elif pause_overlay: resume_game()

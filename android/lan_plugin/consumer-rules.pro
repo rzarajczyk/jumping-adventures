@@ -1,0 +1,1 @@
+-keep class pl.zarajczyk.jumpingpenguin.lan.** { *; }

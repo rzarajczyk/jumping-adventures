@@ -1,0 +1,14 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <application>
+        <meta-data android:name="org.godotengine.plugin.v2.JumpingLan"
+            android:value="pl.zarajczyk.jumpingpenguin.lan.JumpingLan" />
+        <activity android:name="pl.zarajczyk.jumpingpenguin.lan.LanCaptureActivity"
+            android:exported="false" android:screenOrientation="sensorLandscape"
+            android:theme="@style/zxing_CaptureTheme" android:stateNotNeeded="true" />
+    </application>
+</manifest>

@@ -10,3 +10,7 @@ export_credentials.cfg
 tools/__pycache__/
 android/build/
 android/.build_version
+android/lan_plugin/.gradle/
+android/lan_plugin/build/
+android/lan_plugin/local.properties
+addons/lan_pairing/bin/

@@ -1,5 +1,30 @@
 # Raport weryfikacji — Jumping Adventure 1.1.0
 
+## Multiplayer LAN — 28 września 2026
+
+Zaimplementowano lokalny wyścig dwóch graczy, parowanie QR, autorytatywny host, przewidywanie ruchu i mocy, ghosta ze strzałką, wspólne przedmioty, odrodzenia, osobne wyróżnienia, pauzę, odzyskiwanie połączenia i rewanż. Reguły i architekturę opisuje [MULTIPLAYER.md](MULTIPLAYER.md).
+
+- Kampania: `python3 tools/test.py` — **1360 sprawdzeń, 0 niepowodzeń**, wszystkie dziewięć tras ukończone z 11/11 gwiazdek. Kod fizyki i zapisu kampanii nie został zmieniony.
+- Multiplayer: **649 sprawdzeń, 0 niepowodzeń** w silniku Godot. Wszystkie dziewięć kombinacji tras/trudności ukończono w symulatorze w obu rolach. Porównanie zapisanych poleceń z `CharacterBody2D` na pełnych trasach: maksymalny błąd **0,0529 jednostki świata**, zgodne wyspy i momenty lądowania w tolerancji jednego kroku. Osobne przypadki obejmują krawędzie, lot od dołu, unoszenie przez platformę, maksymalny skok i obie moce.
+- Sprawdzono natychmiastowy super-skok po przewidywanej butelce oraz odrzucenie całego skoku, gdy serwer przyzna butelkę rywalowi; stare życia, loty, epoki i rundy; duplikaty; wspólnego właściciela przedmiotu; remis; brak punktu za metę; zachowanie gwiazdek po upadku; 180 kroków odrodzenia i 1800 kroków końca rundy; zatrzymanie czasu podczas pauzy; brak przedłużania terminu odzyskiwania; abort po przekroczeniu terminu bez nadrabiania gry; korektę grafiki do 100 ms i natychmiastowe ustawienie po odrodzeniu.
+- Rzeczywiste procesy hosta i klienta ENet przeszły trzy scenariusze: zwykła sieć, sieć z opóźnieniami i stratą pakietów oraz taka sama sieć z dodatkowym jednostronnym odcięciem na 3,5 s. Każda para zakończyła z identycznym hashem kanonicznego stanu, po pauzie i wymianie połączenia. Sprawdzono następnie rewanż na tym samym połączeniu i dostarczenie informacji o świadomym wyjściu hosta.
+
+Przekaźnik UDP: RTT 150 ms, jitter do ±40 ms, strata 2%, duplikacja 1%, zmienna kolejność pakietów. Pomiary czasu polecenie → stan prezentacji ghosta:
+
+| Scenariusz | P95 host | P95 klient | Liczba obserwowanych akcji host/klient |
+| --- | ---: | ---: | ---: |
+| Zwykła sieć | 17 ms | 20 ms | 24 / 24 |
+| Opóźnienia i strata | 101 ms | 99 ms | 22 / 24 |
+| Po jednostronnym zerwaniu | 104,5 ms | 101,5 ms | 23 / 24 |
+
+To pomiar prezentacji w procesach Godota, nie czasu wyświetlacza telefonu. Przypadki utraty polecenia poza buforem kończą się jawnym odrzuceniem i korektą. Wyniki: `build/race-tests.txt`, `build/multiplayer-tests.txt`, `build/network-*.txt`. Ostatnie dwa sprawdzenia dotyczące wygładzania uruchomiono dodatkowo w `tests/race_runner.tscn` po zakończeniu testów transportu.
+
+Kontrola wizualna: menu, lobby, wyścig, strzałka, pauza i wyniki w Godot 1280×720 (`build/race-*.png`). Na emulatorze **Pixel 10, ARM64, Android 37, 2424×1080** zainstalowano i uruchomiono APK. Zweryfikowano wybór interfejsu, generowanie QR oraz odczyt kodu ze zrzutu przez ZXing: poprawna wersja, IPv4, port 7777 i token 128-bitowy. Sprawdzono żądanie aparatu dopiero przy skanowaniu, odmowę i polski komunikat, jednorazową zgodę, działający podgląd skanera i anulowanie. W logu Godot/AndroidRuntime brak błędów skryptów i awarii. Nie przeprowadzono optycznego skanu QR z drugiego urządzenia.
+
+`python3 tools/build_android.py` buduje plugin Kotlin z kodu źródłowego i eksportuje podpisane **APK 95,3 MiB** oraz **AAB 45,9 MiB**. Podpisy zweryfikowano; min SDK 28, target SDK 36 i dotychczasowy klucz zostały zachowane. Licencje zależności są w paczkach; pliki poświadczeń podpisu nie są dołączone. Nie publikowano wydania i nie zmieniano numeru wersji.
+
+**Do odbioru na sprzęcie:** dwa fizyczne telefony, QR i pełna runda bez Internetu przez router i hotspot w obu rolach, uśpienie/głęboki sen urządzeń, powrót po ponad minucie, płynność oraz opóźnienie obrazu. Nie było podłączonych fizycznych telefonów. Testy emulatora i procesów na macOS nie zastępują tego odbioru.
+
 ## Podniebny podróżnik — 27 września 2026
 
 `python3 tools/test.py`: **1360 sprawdzeń, 0 niepowodzeń**, bez błędów skryptów i zasobów. Wszystkie dziewięć tras ukończono zwykłymi skokami z wynikiem **11/11 gwiazdek**, zbierając oba artefakty i zachowując po trzy niewykorzystane ładunki.

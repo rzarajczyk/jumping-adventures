@@ -99,6 +99,11 @@ jobs:
           test -n "$PENGUIN_ANDROID_SDK"
           python3 tools/build_android.py
 
+      - name: Verify campaign and LAN multiplayer
+        run: |
+          python3 tools/test.py
+          python3 tools/test_multiplayer.py
+
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}

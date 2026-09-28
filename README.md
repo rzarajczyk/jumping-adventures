@@ -34,6 +34,12 @@ adb shell am start -n pl.zarajczyk.jumpingpenguin/com.godot.game.GodotAppLaunche
 
 Easy is designed for ages 6–8; medium and hard are for ages 9 and up. Each route has 20 jumps across 21 islands. A successful run is designed to take 90–150 seconds, including aiming time, with no time limit. This is a design target to validate with children, not a measured result.
 
+## Play together over LAN
+
+Choose **Graj we dwoje** on two phones connected to the same Wi-Fi or manually configured hotspot. One creates a game; the other scans its QR code. Choose characters, a route and difficulty, then both tap **Gotowy**. Race for ten shared stars, power artifacts, and the finish. Falling respawns you on your last island after three seconds; pausing stops both racers. Results and rematches do not alter campaign progress.
+
+The application includes an offline Android QR plugin. See [LAN architecture, rules and tests](docs/MULTIPLAYER.md) for build and recovery details.
+
 ## Open and run the project
 
 Install **Godot 4.7.2 Standard** (not .NET) for your operating system. In the Godot Project Manager, import this project by selecting `project.godot`, then run it. On desktop, aim with the left mouse button; press Escape to pause.
@@ -56,10 +62,11 @@ The repeatable command-line build helper is currently configured for macOS and u
 
 ```sh
 python3 tools/test.py
+python3 tools/test_multiplayer.py
 python3 tools/build_android.py
 ```
 
-The build helper imports project assets, prepares the Gradle project, exports a release APK and AAB, and verifies both signatures. Its executable, SDK, and JDK paths can be overridden with `PENGUIN_GODOT`, `PENGUIN_ANDROID_SDK`, and `PENGUIN_JAVA`. The Godot executable used by the helper must use a local `_sc_` data directory under `.tools`.
+The build helper prepares the Gradle project, compiles the native QR plugin from source, imports assets, exports a release APK and AAB, and verifies both signatures. Run it once before manual exports so the plugin AAR is available. Its executable, SDK, and JDK paths can be overridden with `PENGUIN_GODOT`, `PENGUIN_ANDROID_SDK`, and `PENGUIN_JAVA`. The Godot executable used by the helper must use a local `_sc_` data directory under `.tools`.
 
 The signing key `.tools/jumping-penguin.keystore` and its password file `.tools/signing.json` are created once. **Keep private backups of both files** so future builds can update installations with the same package ID. They are not included in the APK, source archive, or repository. App ID: `pl.zarajczyk.jumpingpenguin`; version: `1.1.0` (version code 2); minimum SDK: 28; target SDK: 36; ABI: `arm64-v8a`.
 
@@ -102,4 +109,4 @@ Power-specific physics, charge, input, and camera checks are included in the sam
 
 ## Assets and licences
 
-The artwork was created with the built-in image generator. The original music and sound effects were created with the project's audio generator. Nunito is licensed under the SIL Open Font License (`assets/fonts/OFL.txt`). Godot and third-party licence notices are in `assets/licenses` and are included in the APK. The project has no network services, analytics, ads, or in-app purchases.
+The artwork was created with the built-in image generator. The original music and sound effects were created with the project's audio generator. Nunito is licensed under the SIL Open Font License (`assets/fonts/OFL.txt`). Godot, ZXing, AndroidX and Kotlin licence notices are in `assets/licenses` and are included in the APK. The project has no Internet services, analytics, ads, or in-app purchases.

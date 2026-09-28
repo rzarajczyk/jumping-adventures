@@ -7,6 +7,7 @@ import secrets
 import subprocess
 import zipfile
 import hashlib
+import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
 ENGINE = Path(os.environ.get("PENGUIN_GODOT", str(ROOT / ".tools/Godot.app/Contents/MacOS/Godot")))
@@ -37,6 +38,13 @@ def main():
     source = TOOLS / "templates/android_source.zip"
     identifier = ".tools/templates/android_source.zip [" + hashlib.md5(source.read_bytes()).hexdigest() + "]"
     (ROOT / "android/.build_version").write_text(identifier + "\n")
+    # Build the native QR plugin from source against the matching local engine
+    # template. Nothing is patched into Godot's generated Gradle project.
+    plugin_env = {**os.environ, "JAVA_HOME": str(JDK), "ANDROID_HOME": str(SDK)}
+    run(android / "gradlew", "-p", ROOT / "android/lan_plugin", "--no-daemon", "assembleRelease", env=plugin_env)
+    plugin_output = ROOT / "addons/lan_pairing/bin"
+    plugin_output.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(ROOT / "android/lan_plugin/build/outputs/aar/JumpingLan-release.aar", plugin_output / "JumpingLan.aar")
     run(ENGINE, "--headless", "--path", ROOT, "--editor", "--import", "--quit")
     settings = TOOLS / "editor_data/editor_settings-4.7.tres"
     if not settings.exists():
