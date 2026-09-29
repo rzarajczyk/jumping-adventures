@@ -43,6 +43,7 @@ func _run() -> void:
 	for level in 3:
 		for difficulty in 3: await compare_route(level, difficulty)
 	test_rules()
+	test_jetpack_rules()
 	test_prediction()
 	test_presentation()
 	test_session_contracts()
@@ -127,25 +128,25 @@ func test_prediction() -> void:
 	prediction.setup(sim.layout, "test", 13)
 	prediction.accept_snapshot(baseline, true)
 	prediction.rebuild(1, 0)
-	check(prediction.sim.state.players[0].wind == 3, "artifact grants predicted inventory without snapshot")
-	var boost := prediction.sim.command(0, 1, "jump", Vector2(0, -600), true)
+	check(prediction.sim.state.players[0].jetpack == 3, "artifact grants predicted inventory without snapshot")
+	var boost := prediction.sim.command(0, 1, "jetpack")
 	prediction.announce(boost)
 	prediction.resolve({"player": 0, "seq": 1, "status": "RECEIVED"})
 	check(prediction.commands.size() == 1, "RECEIVED retains command for replay")
 	prediction.rebuild(2, 0)
-	check(prediction.sim.state.players[0].wind == 2 and prediction.sim.state.players[0].velocity.y < -800, "immediate boost uses predicted bottle")
-	# Rival's unseen movement reaches the bottle first in the authoritative run.
+	check(prediction.sim.state.players[0].jetpack == 2 and prediction.sim.state.players[0].velocity.y < -340, "immediate boost uses predicted jetpack")
+	# Rival's unseen movement reaches the jetpack first in the authoritative run.
 	sim.state.players[1].position = sim.item_at(artifact, 0) + Vector2(0, 34)
 	sim.state.players[1].ground = -1
 	artifact.priority = 1
 	sim.step()
-	check(sim.state.owners[artifact.id] == 1, "server can award predicted bottle to opponent")
+	check(sim.state.owners[artifact.id] == 1, "server can award predicted jetpack to opponent")
 	sim.step([boost])
-	check(sim.decisions[0].reason == "power", "server denies the entire dependent super-jump")
+	check(sim.decisions[0].reason == "power", "server denies the entire dependent jetpack launch")
 	prediction.resolve(sim.decisions[0])
 	prediction.accept_snapshot(sim.snapshot())
 	prediction.rebuild(8, 0)
-	check(prediction.sim.state.players[0].ground == artifact.island and prediction.sim.state.players[0].wind == 0, "reconciliation removes boost movement and inventory")
+	check(prediction.sim.state.players[0].ground == artifact.island and prediction.sim.state.players[0].jetpack == 0, "reconciliation removes boost movement and inventory")
 	prediction.rebuild(sim.state.tick + 19, 0)
 	check(prediction.ghost_stale, "opponent prediction stops after 300 ms")
 	prediction.rebuild(sim.state.tick + 121, 0)
@@ -171,15 +172,15 @@ func test_session_contracts() -> void:
 	Race._physics_process(1.0 / 60)
 	Race.simulation.step(Race.pending.get(1, []))
 	Race.pending.clear()
-	var late := Race.simulation.command(0, 2, "anchor")
+	var late := Race.simulation.command(0, 2, "jetpack")
 	late.tick = 1
 	Race._accept_command(late, 0)
 	check(Race.resolved["0:2"].reason == "late", "server rejects late input without retiming")
-	var stale := Race.simulation.command(0, 3, "anchor")
+	var stale := Race.simulation.command(0, 3, "jetpack")
 	stale.life += 1
 	Race.simulation.step([stale])
 	check(Race.simulation.decisions[0].reason == "life", "old-life command cannot act")
-	stale = Race.simulation.command(0, 4, "anchor")
+	stale = Race.simulation.command(0, 4, "jetpack")
 	Race._pause_host()
 	var frozen := Race.simulation.snapshot()
 	Race._physics_process(50.0)
@@ -219,6 +220,13 @@ func test_presentation() -> void:
 	p.position += Vector2(300, -100)
 	actor.present(p, 0, 1.0 / 60, false, false)
 	check(actor.position == p.position, "respawn changes position without interpolating across the world")
+	p.ground = -1
+	p.jetpack_tick = 60
+	p.jetpack = 2
+	actor.present(p, 1.1, 1.0 / 60, false, false)
+	check(actor.jetpack_age < AdventurePowers.JETPACK_DURATION and actor.powers.jetpack == 2, "snapshot displays jetpack ignition and charge count")
+	actor.present(p, 1.6, 1.0 / 60, false, false)
+	check(actor.jetpack_age > AdventurePowers.JETPACK_DURATION, "repeated snapshots do not restart jetpack animation")
 	actor.queue_free()
 
 func fixture(amplitude: Vector2, width: float = 6000.0) -> PhysicsFixture:
@@ -239,22 +247,22 @@ func fixture(amplitude: Vector2, width: float = 6000.0) -> PhysicsFixture:
 	add_child(scene)
 	return scene
 
-func compare_physics(amplitude: Vector2, vector: Vector2, boost: bool, anchor: bool) -> void:
+func compare_physics(amplitude: Vector2, vector: Vector2, ground_jetpack: bool, air_jetpack: bool) -> void:
 	var f := fixture(amplitude)
 	await frames(8)
 	f.sim.state.players[0].position = f.body.position
-	f.sim.state.players[0].wind = 3
-	f.sim.state.players[0].anchor = 3
-	f.commands.append(f.sim.command(0, 1, "jump", vector, boost))
-	f.body.jump(vector * (sqrt(2.0) if boost else 1.0), boost)
+	f.sim.state.players[0].jetpack = 3
+	f.commands.append(f.sim.command(0, 1, "jetpack" if ground_jetpack else "jump", vector))
+	if ground_jetpack: f.body.activate_jetpack()
+	else: f.body.jump(vector)
 	var max_error := 0.0
 	var sim_landing := -1
 	var reference_landing := -1
 	var worst := ""
 	for i in 200:
-		if anchor and i == 15:
-			f.commands.append(f.sim.command(0, 2, "anchor"))
-			f.body.stop_flight()
+		if air_jetpack and i in [15, 35, 55]:
+			f.commands.append(f.sim.command(0, i + 2, "jetpack"))
+			f.body.activate_jetpack()
 		await frames(1)
 		var error := f.body.position.distance_to(f.sim.state.players[0].position)
 		if error > max_error:
@@ -263,7 +271,7 @@ func compare_physics(amplitude: Vector2, vector: Vector2, boost: bool, anchor: b
 		if i > 1 and sim_landing < 0 and f.sim.state.players[0].ground >= 0: sim_landing = i
 		if i > 1 and reference_landing < 0 and f.body.can_jump(): reference_landing = i
 		if sim_landing >= 0 and reference_landing >= 0 and i > maxi(sim_landing, reference_landing) + 12: break
-	var label := "amp=%s boost=%s anchor=%s" % [amplitude, boost, anchor]
+	var label := "amp=%s ground_jetpack=%s air_jetpack=%s" % [amplitude, ground_jetpack, air_jetpack]
 	if max_error > 2.0: print("DIFFERENTIAL ", label, " ", worst)
 	check(max_error <= 2.0, "physics positions %s error=%f" % [label, max_error])
 	check(sim_landing >= 0 and reference_landing >= 0 and absi(sim_landing - reference_landing) <= 1, "physics landing %s ticks=%d/%d" % [label, sim_landing, reference_landing])
@@ -314,16 +322,16 @@ func test_rules() -> void:
 	var jump := sim.command(0, 1, "jump", Vector2(0, -600))
 	sim.step([jump])
 	check(sim.decisions[0].status == "EXECUTED", "jump executes")
-	var old_anchor := sim.command(0, 2, "anchor")
-	sim.state.players[0].anchor = 3
+	var old_jetpack := sim.command(0, 2, "jetpack")
+	sim.state.players[0].jetpack = 3
 	sim.state.players[0].flight = 99
-	sim.step([old_anchor])
-	check(sim.decisions[0].reason == "flight" and sim.state.players[0].anchor == 3, "anchor never affects another flight")
+	sim.step([old_jetpack])
+	check(sim.decisions[0].reason == "flight" and sim.state.players[0].jetpack == 3, "jetpack never affects another flight")
 	sim.step([jump])
 	check(sim.decisions[0].status == "REJECTED", "late jump is not retimed")
-	var boosted := sim.command(1, 3, "jump", Vector2(0, -500), true)
+	var boosted := sim.command(1, 3, "jetpack")
 	sim.step([boosted])
-	check(sim.decisions[0].reason == "power" and sim.state.players[1].ground == 0, "invalid boost rejects entire jump")
+	check(sim.decisions[0].reason == "power" and sim.state.players[1].ground == 0, "empty jetpack cannot launch from ground")
 	var snap := sim.snapshot()
 	sim.step()
 	var expected := sim.snapshot()
@@ -340,11 +348,10 @@ func test_rules() -> void:
 	check(sim.state.players[0].stars + sim.state.players[1].stars == 1, "shared star granted once")
 	var owner: int = sim.state.owners[star.id]
 	var p: Dictionary = sim.state.players[owner]
-	p.wind = 3
-	p.anchor = 2
+	p.jetpack = 3
 	p.position.y = 700
 	sim.step()
-	check(p.wind == 0 and p.anchor == 0 and p.stars == 1, "fall clears powers but preserves score")
+	check(p.jetpack == 0 and p.stars == 1, "fall clears powers but preserves score")
 	var respawn_at: int = p.respawn
 	for _i in 179: sim.step()
 	check(p.respawn == respawn_at, "no early respawn")
@@ -366,3 +373,34 @@ func test_rules() -> void:
 	check(not sim.state.ended, "second racer retains full finish window")
 	sim.step()
 	check(sim.state.ended and sim.state.players[1].finish < 0.0, "finish deadline is 1800 active ticks after contact")
+
+func test_jetpack_rules() -> void:
+	var sim := make_sim()
+	var p: Dictionary = sim.state.players[0]
+	p.jetpack = 3
+	var command := sim.command(0, 1, "jetpack", Vector2(8000, -9000))
+	check(RaceProtocol.valid_command(command), "jetpack command uses current protocol")
+	var legacy := command.duplicate(true)
+	legacy.kind = "anchor"
+	check(not RaceProtocol.valid_command(legacy), "retired anchor command rejected")
+	sim.step([command], false)
+	check(sim.decisions[0].status == "EXECUTED" and p.jetpack == 2 and p.ground == -1, "ground jetpack spends one charge")
+	check((p.velocity - Vector2(0, RaceSimulation.GRAVITY * RaceSimulation.DT)).is_equal_approx(AdventurePowers.launch_vector(1)), "client vector cannot alter jetpack strength or angle")
+	for seq in [2, 3]:
+		p.velocity = Vector2(-600, 500)
+		p.facing = -1.0
+		sim.step([sim.command(0, seq, "jetpack")], false)
+		check(sim.decisions[0].status == "EXECUTED" and p.jetpack == 3 - seq, "repeated airborne jetpack spends exactly one charge")
+		check((p.velocity - Vector2(0, RaceSimulation.GRAVITY * RaceSimulation.DT)).is_equal_approx(AdventurePowers.launch_vector(-1)), "falling backwards jetpack has fixed launch")
+	sim.step([sim.command(0, 4, "jetpack")], false)
+	check(sim.decisions[0].reason == "power" and p.jetpack == 0, "fourth use rejected")
+	p.jetpack = 1
+	command = sim.command(0, 5, "jetpack")
+	p.landing += 1
+	sim.step([command], false)
+	check(sim.decisions[0].reason == "landing" and p.jetpack == 1, "old landing jetpack cannot spend a charge")
+	for inactive in ["respawn", "finish"]:
+		p[inactive] = 99
+		sim.step([sim.command(0, 6, "jetpack")], false)
+		check(sim.decisions[0].reason == "inactive" and p.jetpack == 1, "inactive racer cannot use jetpack: " + inactive)
+		p[inactive] = -1

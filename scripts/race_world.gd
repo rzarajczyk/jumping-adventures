@@ -99,12 +99,12 @@ func _physics_process(delta: float) -> void:
 	furthest = local.furthest
 	splash_time = maxf(0, 3.0 - float(local.respawn - view.tick) / 60.0) if local.respawn >= 0 else -1.0
 	splash_position = Vector2(local.position.x, 647)
-	if not player.can_jump() and (gesture.pointer != -99 or powers.armed): cancel_gesture()
+	if not player.can_jump() and gesture.pointer != -99: cancel_gesture()
 	if gesture.pointer != -99 and player.can_jump(): player.state = JumpingPenguin.State.AIMING
 	for item in stars: item.taken = view.owners["star:%d" % item.island.index] >= 0
 	for item in artifacts: item.taken = view.owners["power:%d" % item.island.index] >= 0
 	for event in prediction.events:
-		if event.player == Race.local_player and event.kind in ["jump", "anchor", "land", "fall"]: _effect_once(event)
+		if event.player == Race.local_player and event.kind in ["jump", "jetpack", "land", "fall"]: _effect_once(event)
 	var other: Dictionary = prediction.ghost
 	var target_position: Vector2 = other.position + Vector2(0, -40)
 	var remaining := 0
@@ -126,10 +126,10 @@ func _effect_once(event: Dictionary) -> void:
 	seen_events[event.id] = true
 	if event.player != Race.local_player: return
 	match event.kind:
-		"jump": Sound.effect("super_jump" if event.boosted else "jump")
-		"anchor":
-			Sound.effect("anchor")
-			effects.catch_air(player.position + Vector2(0, -35), player.facing)
+		"jump": Sound.effect("jump")
+		"jetpack":
+			Sound.effect("jetpack")
+			effects.ignite(player.position + Vector2(0, -35), player.facing)
 		"land": Sound.effect("land")
 		"fall": Sound.effect("splash")
 		"star":
@@ -137,31 +137,25 @@ func _effect_once(event: Dictionary) -> void:
 			particles.append({"position": event.position, "born": clock})
 		"artifact":
 			Sound.effect("artifact")
-			effects.burst(event.position, AdventurePowers.WIND_COLOR if event.power_kind == 1 else AdventurePowers.ANCHOR_COLOR)
+			effects.burst(event.position, AdventurePowers.JETPACK_COLOR)
 			artifact_collected.emit(event.get("power_kind", 1), event.position)
 		"finish": Sound.effect("win")
 
 func _powers_allowed() -> bool:
 	return Race.phase == "race" and not Race.suspended and not view.is_empty() and not finished and splash_time < 0.0
 
-func can_arm_wind() -> bool:
-	return _powers_allowed() and powers.wind > 0 and player.can_jump() and gesture.pointer == -99
-
-func can_use_anchor() -> bool:
-	return _powers_allowed() and powers.anchor > 0 and not powers.anchor_used and player.state == JumpingPenguin.State.AIR
-
 func launch(vector: Vector2) -> bool:
 	if not _powers_allowed() or not player.can_jump() or vector == Vector2.ZERO: return false
-	var c := prediction.sim.command(Race.local_player, Race.next_sequence(), "jump", vector, powers.armed and powers.wind > 0)
+	var c := prediction.sim.command(Race.local_player, Race.next_sequence(), "jump", vector)
 	prediction.announce(c)
-	powers.disarm()
 	player.aim = Vector2.ZERO
 	Race.submit(c)
 	return true
 
-func use_anchor() -> bool:
-	if not can_use_anchor(): return false
-	var c := prediction.sim.command(Race.local_player, Race.next_sequence(), "anchor")
+func use_jetpack() -> bool:
+	if not can_use_jetpack(): return false
+	cancel_gesture()
+	var c := prediction.sim.command(Race.local_player, Race.next_sequence(), "jetpack")
 	prediction.announce(c)
 	Race.submit(c)
 	return true
@@ -175,7 +169,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _update_race_camera(delta: float, focus: RaceActor) -> void:
 	var viewport_size := get_viewport_rect().size
 	var desired_zoom := 1.0
-	if focus.boosted_flight:
+	if focus.jetpack_flight:
 		var apex: float = focus.simulation_position.y - minf(0.0, focus.velocity.y) ** 2 / (2.0 * RaceSimulation.GRAVITY) - 110
 		desired_zoom = minf(1.0, (WATER_Y - 142) / maxf(1, WATER_Y - apex))
 	camera.zoom = Vector2.ONE * lerpf(camera.zoom.x, desired_zoom, 1.0 - exp(-delta * 8.0))

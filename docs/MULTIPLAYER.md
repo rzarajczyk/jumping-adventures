@@ -4,7 +4,7 @@
 
 ## Reguły
 
-- Dziesięć małych gwiazdek i dwa artefakty są wspólne. Przedmiot trafia do jednej osoby; artefakt daje trzy ładunki mocy.
+- Dziesięć małych gwiazdek i dwa artefakty jetpacka są wspólne. Przedmiot trafia do jednej osoby; artefakt uzupełnia jetpack do trzech użyć. Jetpack działa na wyspie i w powietrzu: ustawia prędkość 425 jednostek/s pod kątem 60° w kierunku zwrócenia postaci. Można użyć kolejnych ładunków w tym samym locie.
 - Duża gwiazda kończy trasę po dotknięciu i nie daje punktu. Po pierwszej mecie drugi gracz ma 30 sekund aktywnej gry. Ukończenie przez obu kończy rundę wcześniej.
 - Osobne wyróżnienia: „Pierwszy na mecie” i „Najwięcej gwiazdek”. Remisy są możliwe; przy 0:0 nie ma wyróżnienia za gwiazdki. Nieukończenie trasy nie kasuje gwiazdek.
 - Upadek usuwa moce. Po trzech sekundach gracz wraca na środek ostatniej odwiedzonej wyspy w jej aktualnym położeniu. Gwiazdki i wspólny świat zostają zachowane.
@@ -29,6 +29,8 @@ Skrypty GDScript znajdują się w `scripts/`. Faza wysp jawnie odwzorowuje opó�
 
 ## Sieć
 
+Jetpack używa protokołu w wersji 2; oba urządzenia muszą mieć zgodną wersję reguł. Fingerprint obejmuje także kąt, siłę i liczbę ładunków jetpacka.
+
 Domyślny port: UDP 7777. Host dopuszcza jeden transport klienta. Miejsce uczestnika i token odzyskiwania istnieją niezależnie od ID połączenia ENet. Zaproszenie zawiera wersję, IPv4, port, ID sesji i losowy token 128-bitowy. Po przyjęciu uczestnika wygasa. Zmiana adresu przed przyjęciem uczestnika regeneruje zaproszenie.
 
 | Kanał | Tryb i dane |
@@ -40,9 +42,9 @@ Domyślny port: UDP 7777. Host dopuszcza jeden transport klienta. Miejsce uczest
 
 Osiem początkowych wymian ustanawia czas; dalsze pomiary odbywają się z heartbeatami co 250 ms. Preferowane są próbki z najniższym RTT w ostatnim oknie. Oba telefony, także host, przewidują ruch przed autorytatywną symulacją.
 
-Polecenie wskazuje rundę, epokę, sekwencję, dokładny krok, życie, lądowanie i lot. Kotwiczka dotyczy konkretnego skoku. Spóźnione polecenie jest odrzucane, nigdy przesuwane. `RECEIVED` zachowuje polecenie do odtworzenia; `EXECUTED` i `REJECTED` rozstrzygają jego los. Klient nie zgłasza autorytatywnych pozycji ani punktów.
+Polecenie wskazuje rundę, epokę, sekwencję, dokładny krok, życie, lądowanie i lot. Jetpack sprawdza bieżące lądowanie i lot, więc stare polecenie nie może wywołać wybicia po kolejnym lądowaniu. Serwer wylicza stały wektor jetpacka niezależnie od wektora przesłanego przez klienta. Spóźnione polecenie jest odrzucane, nigdy przesuwane. `RECEIVED` zachowuje polecenie do odtworzenia; `EXECUTED` i `REJECTED` rozstrzygają jego los. Klient nie zgłasza autorytatywnych pozycji ani punktów.
 
-Historia obejmuje dwie sekundy; brak historii wywołuje pauzę i pełną synchronizację. Można natychmiast użyć przewidywanej butelki. Jeżeli serwer przyzna ją rywalowi, odrzuca zależny super-skok w całości. Identyfikatory efektów zapobiegają powtórzeniom. Kontakty obu graczy są porównywane wewnątrz kroku. Różnica do 1 ms używa wcześniej wylosowanego priorytetu przedmiotu; na mecie oznacza remis.
+Historia obejmuje dwie sekundy; brak historii wywołuje pauzę i pełną synchronizację. Można natychmiast użyć przewidywanego artefaktu jetpacka. Jeżeli serwer przyzna go rywalowi, odrzuca zależne wybicie w całości. Identyfikatory efektów zapobiegają powtórzeniom. Kontakty obu graczy są porównywane wewnątrz kroku. Różnica do 1 ms używa wcześniej wylosowanego priorytetu przedmiotu; na mecie oznacza remis.
 
 ## Odzyskiwanie
 

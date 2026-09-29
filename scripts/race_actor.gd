@@ -41,10 +41,8 @@ func present(p: Dictionary, seconds: float, delta: float, reconcile: bool, snap:
 	grounded = p.ground >= 0
 	state = State.FALL if p.respawn >= 0 else (State.WON if p.finish >= 0.0 else (State.IDLE if grounded else State.AIR))
 	facing = p.facing
-	boosted_flight = p.boosted
-	boost_age = 0.2 if boosted_flight else 10.0
-	powers.wind = p.wind
-	powers.anchor = p.anchor
-	powers.anchor_used = p.anchor_used
-	if not grounded or powers.wind == 0: powers.armed = false
+	jetpack_flight = p.jetpack_tick >= 0
+	jetpack_age = maxf(0.0, seconds - float(p.jetpack_tick) / RaceSimulation.HZ) if jetpack_flight else 10.0
+	powers.jetpack = p.jetpack
+	squash = -0.20 * maxf(0.0, 1.0 - jetpack_age / 0.15)
 	queue_redraw()

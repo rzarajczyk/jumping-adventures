@@ -3,8 +3,7 @@
 [resource]
 script = ExtResource("1")
 id = 0
-wind_island = 2
-anchor_island = 4
+jetpack_islands = PackedInt32Array(2, 4)
 title = "Chmurkowy Ogród"
 subtitle = "Pierwszy skok w wielką przygodę"
 art = "garden"

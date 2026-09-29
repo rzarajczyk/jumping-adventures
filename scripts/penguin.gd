@@ -16,10 +16,9 @@ var sprite: Texture2D
 var blink_sprite: Texture2D
 var flying_sprite: Texture2D
 var powers: AdventurePowers
-var boosted_flight := false
-var boost_age: float = 10.0
+var jetpack_flight := false
+var jetpack_age: float = 10.0
 var pack_texture: Texture2D
-var anchor_texture: Texture2D
 
 # Coordinates in the character's facing-right accessory space, before mirroring.
 const PACK_OFFSETS := {
@@ -47,18 +46,17 @@ func _ready() -> void:
 	blink_sprite = AdventureCharacters.frame(character_id, "blink")
 	flying_sprite = AdventureCharacters.frame(character_id, "fly")
 	pack_texture = PenguinArt.texture("cloud_pack")
-	anchor_texture = PenguinArt.texture("anchor")
 	z_index = 5
 
 func can_jump() -> bool:
 	return is_on_floor() and (state == State.IDLE or state == State.AIMING)
 
-func jump(vector: Vector2, boosted: bool = false) -> bool:
+func jump(vector: Vector2) -> bool:
 	if not can_jump() or vector == Vector2.ZERO:
 		return false
 	velocity = vector
-	boosted_flight = boosted
-	boost_age = 0.0 if boosted else 10.0
+	jetpack_flight = false
+	jetpack_age = 10.0
 	state = State.AIR
 	aim = Vector2.ZERO
 	if absf(vector.x) > 1.0:
@@ -67,16 +65,26 @@ func jump(vector: Vector2, boosted: bool = false) -> bool:
 	jumped.emit()
 	return true
 
-func stop_flight() -> bool:
-	if state != State.AIR:
+func can_use_jetpack() -> bool:
+	return state == State.AIR or can_jump()
+
+func activate_jetpack() -> bool:
+	if not can_use_jetpack():
 		return false
-	velocity = Vector2.ZERO
-	squash = 0.16
+	# Replace both components: every ignition has exactly the same trajectory,
+	# including while falling. Repeated uses spend separate inventory charges.
+	velocity = AdventurePowers.launch_vector(facing)
+	state = State.AIR
+	aim = Vector2.ZERO
+	jetpack_flight = true
+	jetpack_age = 0.0
+	squash = -0.20
+	queue_redraw()
 	return true
 
 func _physics_process(delta: float) -> void:
 	clock += delta
-	boost_age += delta
+	jetpack_age += delta
 	squash = move_toward(squash, 0.0, delta * 1.5)
 	if state == State.FALL or state == State.WON:
 		queue_redraw()
@@ -90,7 +98,8 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		if was_air:
 			state = State.IDLE
-			boosted_flight = false
+			jetpack_flight = false
+			jetpack_age = 10.0
 			squash = 0.20
 			for i in get_slide_collision_count():
 				var hit := get_slide_collision(i)
@@ -128,32 +137,30 @@ func _draw() -> void:
 	var bounds := Vector2(108, 92) if character_id == "whale" else Vector2(86, 92)
 	frame_size *= minf(bounds.x / frame_size.x, bounds.y / frame_size.y)
 	draw_texture_rect(frame, Rect2(Vector2(-frame_size.x * 0.5, 43 - frame_size.y), frame_size), false)
-	draw_set_transform(Vector2(0, bob - 43), angle, Vector2(facing, 1) * stretch)
-	if powers and powers.anchor > 0 and anchor_texture:
-		var charm := Vector2(17, 15) if character_id == "whale" else Vector2(13, 12)
-		draw_line(charm + Vector2(0, -12), charm, Color("eee3fb"), 2, true)
-		draw_texture_rect(anchor_texture, Rect2(charm - Vector2(8, 0), Vector2(16, 19)), false)
 	draw_set_transform(Vector2.ZERO)
 	if state == State.AIMING and aim.length() > 0.0:
 		var direction := aim.normalized()
 		var from := Vector2(0, -56)
 		var tip := from + direction * (42.0 + 90.0 * aim.length() / JumpGesture.MAX_SPEED)
 		draw_line(from, tip, Color("fffaf0"), 12, true)
-		var ink := AdventurePowers.WIND_COLOR if powers and powers.armed else Color("368d89")
+		var ink := Color("368d89")
 		draw_line(from, tip, ink, 7, true)
 		var normal := direction.orthogonal()
 		draw_colored_polygon(PackedVector2Array([tip + direction * 13, tip - direction * 13 + normal * 12, tip - direction * 13 - normal * 12]), ink)
 
 func _draw_pack() -> void:
-	if not powers or not pack_texture or (powers.wind == 0 and boost_age > 0.25):
+	if not pack_texture or jetpack_age >= AdventurePowers.JETPACK_DURATION:
 		return
 	var center: Vector2 = PACK_OFFSETS.get(character_id, PACK_OFFSETS.penguin)
-	var puff := 1.12 + sin(clock * 18.0) * 0.035 if powers.armed else 1.0
-	var pack_size := Vector2(38, 43) * puff
-	if boost_age < 0.25:
-		pack_size *= 1.0 + 0.18 * sin(boost_age / 0.25 * PI)
-	draw_texture_rect(pack_texture, Rect2(center - pack_size * 0.5, pack_size), false)
-	if powers.armed:
-		for i in 2:
-			var at := center + Vector2(-9 + 17 * i, -25 - sin(clock * 18.0 + i) * 2)
-			draw_line(at, at + Vector2(2, -4), AdventurePowers.WIND_COLOR, 1.6, true)
+	var progress := clampf(jetpack_age / AdventurePowers.JETPACK_DURATION, 0.0, 1.0)
+	var fade := 1.0 - smoothstep(0.65, 1.0, progress)
+	var pop := 1.0 + 0.18 * sin(progress * PI)
+	var pack_size := Vector2(38, 43) * pop
+	# Exhaust points opposite the fixed 60-degree launch in facing-right space.
+	var exhaust := Vector2(-0.5, sin(AdventurePowers.JETPACK_ANGLE))
+	for i in 2:
+		var nozzle := center + Vector2(-12 + 14 * i, 15)
+		var length := (24.0 + 7.0 * sin(clock * 55.0 + i)) * (1.0 - progress * 0.5)
+		draw_line(nozzle, nozzle + exhaust * length, Color(0.63, 0.76, 1.0, fade * 0.8), 12, true)
+		draw_line(nozzle, nozzle + exhaust * length * 0.8, Color(0.96, 0.99, 1.0, fade), 6, true)
+	draw_texture_rect(pack_texture, Rect2(center - pack_size * 0.5, pack_size), false, Color(1, 1, 1, fade))

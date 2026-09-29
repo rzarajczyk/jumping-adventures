@@ -86,7 +86,7 @@ func build_level() -> void:
 	player.position = islands[0].position + Vector2(0, -2)
 	add_child(player)
 	player.landed.connect(_on_landed)
-	player.jumped.connect(func(): Sound.effect("super_jump" if player.boosted_flight else "jump"))
+	player.jumped.connect(func(): Sound.effect("jump"))
 	camera.zoom = Vector2.ONE
 	camera.position = get_viewport_rect().size * 0.5
 	camera.reset_smoothing()
@@ -112,9 +112,9 @@ func _physics_process(delta: float) -> void:
 	for island in islands:
 		island.advance(clock)
 	_update_camera(delta)
-	if (gesture.pointer != -99 or powers.armed) and not player.can_jump():
+	if gesture.pointer != -99 and not player.can_jump():
 		cancel_gesture()
-	if player.boosted_flight and player.boost_age < 0.42:
+	if player.jetpack_flight and player.jetpack_age < AdventurePowers.JETPACK_DURATION:
 		trail_time += delta
 		if trail_time >= 0.055:
 			trail_time = 0.0
@@ -125,7 +125,7 @@ func _physics_process(delta: float) -> void:
 			if (player.position + Vector2(0, -34)).distance_to(at) < 48.0:
 				item.taken = true
 				powers.grant(item.kind)
-				effects.burst(at, AdventurePowers.WIND_COLOR if item.kind == AdventurePowers.Kind.WIND else AdventurePowers.ANCHOR_COLOR)
+				effects.burst(at, AdventurePowers.JETPACK_COLOR)
 				Sound.effect("artifact")
 				artifact_collected.emit(item.kind, at)
 	for item in stars:
@@ -155,7 +155,6 @@ func star_position(item: Dictionary) -> Vector2:
 
 func _on_landed(island: SkyIsland) -> void:
 	Sound.effect("land")
-	powers.landed()
 	flight_zoom = 1.0
 	if island.index > furthest:
 		furthest = island.index
@@ -180,7 +179,6 @@ func _check_goal() -> void:
 
 func cancel_gesture() -> void:
 	gesture.cancel()
-	powers.disarm()
 	if is_instance_valid(player):
 		player.aim = Vector2.ZERO
 		if player.state == JumpingPenguin.State.AIMING:
@@ -188,44 +186,31 @@ func cancel_gesture() -> void:
 		player.queue_redraw()
 	powers_changed.emit()
 
-func can_arm_wind() -> bool:
-	return _powers_allowed() and powers.wind > 0 and player.can_jump() and gesture.pointer == -99
-
-func can_use_anchor() -> bool:
-	return _powers_allowed() and powers.anchor > 0 and not powers.anchor_used and player.state == JumpingPenguin.State.AIR
+func can_use_jetpack() -> bool:
+	return _powers_allowed() and powers.jetpack > 0 and player.can_use_jetpack()
 
 func _powers_allowed() -> bool:
 	return is_instance_valid(player) and not get_tree().paused and not finished and splash_time < 0.0 and player.position.y < WATER_Y
 
-func toggle_super_jump() -> bool:
-	return powers.toggle_wind() if can_arm_wind() else false
-
-func use_anchor() -> bool:
-	if not can_use_anchor() or not player.stop_flight():
+func use_jetpack() -> bool:
+	if not can_use_jetpack():
 		return false
-	powers.consume_anchor()
-	effects.catch_air(player.position + Vector2(0, -35), player.facing)
-	if powers.anchor == 0:
-		effects.puff(player.position + Vector2(13 * player.facing, -25), 10)
-	Sound.effect("anchor")
+	cancel_gesture()
+	if not player.activate_jetpack():
+		return false
+	powers.consume_jetpack()
+	effects.ignite(player.position + Vector2(0, -35), player.facing)
+	trail_time = 0.0
+	Sound.effect("jetpack")
+	var apex_top := player.position.y - player.velocity.y ** 2 / (2.0 * JumpingPenguin.GRAVITY) - 110.0
+	# Allow chained midair jumps to extend the view while keeping the waterline fixed.
+	var top_margin := maxf(142.0, (get_viewport_rect().size.y - 720.0) * 0.5 + 142.0)
+	flight_zoom = minf(flight_zoom, (WATER_Y - top_margin) / maxf(1.0, WATER_Y - apex_top))
 	return true
 
 func launch(vector: Vector2) -> bool:
-	if not _powers_allowed():
+	if not _powers_allowed() or not player.jump(vector):
 		return false
-	var boosted := powers.armed and powers.wind > 0
-	var actual := vector * AdventurePowers.JUMP_MULTIPLIER if boosted else vector
-	if not player.jump(actual, boosted):
-		return false
-	if boosted:
-		powers.consume_wind()
-		var apex_top := player.position.y - actual.y * actual.y / (2.0 * JumpingPenguin.GRAVITY) - 110.0
-		# Keep the predicted apex below the HUD and anchor zoom to the existing waterline.
-		var top_margin := maxf(142.0, (get_viewport_rect().size.y - 720.0) * 0.5 + 142.0)
-		flight_zoom = minf(1.0, (WATER_Y - top_margin) / maxf(1.0, WATER_Y - apex_top))
-		effects.puff(player.position + Vector2(-28 * player.facing, -30), 26)
-		effects.puff(player.position + Vector2(-41 * player.facing, -25), 21)
-		trail_time = 0.0
 	powers_changed.emit()
 	return true
 
@@ -286,16 +271,11 @@ func _draw() -> void:
 		if item.taken:
 			continue
 		var at := artifact_position(item)
-		var is_wind: bool = item.kind == AdventurePowers.Kind.WIND
-		var glow := AdventurePowers.WIND_COLOR if is_wind else AdventurePowers.ANCHOR_COLOR
+		var glow := AdventurePowers.JETPACK_COLOR
 		glow.a = 0.13
 		draw_circle(at, 35 + sin(clock * 3.0) * 2, glow)
-		draw_set_transform(at, sin(clock * (4.0 if is_wind else 2.0)) * (0.045 if is_wind else 0.14))
-		draw_texture_rect(PenguinArt.texture("wind_bottle" if is_wind else "anchor"), Rect2(-25, -28, 50, 56), false)
-		if is_wind:
-			for i in 2:
-				var cork_at := Vector2(-5 + i * 10, -32 - sin(clock * 8.0) * 2)
-				draw_line(cork_at, cork_at + Vector2(0, -4), Color("a4a4da"), 1.5, true)
+		draw_set_transform(at, sin(clock * 4.0) * 0.045)
+		draw_texture_rect(PenguinArt.texture("cloud_pack"), Rect2(-25, -28, 50, 56), false)
 		draw_set_transform(Vector2.ZERO)
 	for item in stars:
 		if item.taken:

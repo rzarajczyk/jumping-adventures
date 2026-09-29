@@ -39,7 +39,7 @@ func setup(data: Array, round_id: String, seed_value: int) -> void:
 func new_player() -> Dictionary:
 	return {"position": island_at(0, 0) + Vector2(0, -SKIN), "velocity": Vector2.ZERO,
 		"ground": 0, "last_island": 0, "landing": 0, "life": 0, "flight": 0,
-		"wind": 0, "anchor": 0, "anchor_used": false, "boosted": false,
+		"jetpack": 0, "jetpack_tick": -1000,
 		"facing": 1.0, "respawn": -1, "finish": -1.0, "stars": 0, "furthest": 0}
 
 func snapshot() -> Dictionary:
@@ -65,11 +65,11 @@ func item_at(item: Dictionary, seconds: float) -> Vector2:
 func goal_at(seconds: float) -> Vector2:
 	return island_at(layout.size() - 1, seconds) + Vector2(0, -92 + sin(seconds * 2.0) * 6)
 
-func command(player: int, seq: int, kind: String, vector: Vector2 = Vector2.ZERO, boosted: bool = false) -> Dictionary:
+func command(player: int, seq: int, kind: String, vector: Vector2 = Vector2.ZERO) -> Dictionary:
 	var p: Dictionary = state.players[player]
 	return {"round": state.round, "epoch": state.epoch, "seq": seq, "tick": state.tick + 1,
 		"player": player, "life": p.life, "landing": p.landing, "flight": p.flight,
-		"kind": kind, "vector": vector, "boosted": boosted}
+		"kind": kind, "vector": vector}
 
 func apply_command(c: Dictionary) -> String:
 	if c.round != state.round or c.epoch != state.epoch: return "epoch"
@@ -81,21 +81,22 @@ func apply_command(c: Dictionary) -> String:
 		if p.ground < 0 or c.landing != p.landing: return "landing"
 		var v: Vector2 = c.vector
 		if not v.is_finite() or v.length() > MAX_SPEED + 0.01 or v.y >= 0.0: return "vector"
-		if c.boosted and p.wind <= 0: return "power"
-		p.velocity = v * (sqrt(2.0) if c.boosted else 1.0)
+		p.velocity = v
 		p.ground = -1
 		p.flight = c.seq
-		p.boosted = c.boosted
-		if c.boosted: p.wind -= 1
+		p.jetpack_tick = -1000
 		if absf(v.x) > 1.0: p.facing = signf(v.x)
-		_event("jump", c.player, str(c.seq), {"boosted": c.boosted})
-	elif c.kind == "anchor":
-		if p.ground >= 0 or c.flight != p.flight: return "flight"
-		if p.anchor <= 0 or p.anchor_used: return "power"
-		p.velocity = Vector2.ZERO
-		p.anchor -= 1
-		p.anchor_used = true
-		_event("anchor", c.player, str(c.seq))
+		_event("jump", c.player, str(c.seq))
+	elif c.kind == "jetpack":
+		if c.landing != p.landing: return "landing"
+		if c.flight != p.flight: return "flight"
+		if p.jetpack <= 0: return "power"
+		p.velocity = AdventurePowers.launch_vector(p.facing)
+		if p.ground >= 0: p.flight = c.seq
+		p.ground = -1
+		p.jetpack -= 1
+		p.jetpack_tick = state.tick
+		_event("jetpack", c.player, str(c.seq))
 	else:
 		return "kind"
 	return ""
@@ -119,10 +120,8 @@ func step(commands: Array = [], collect: bool = true) -> void:
 			p.respawn = state.tick + RESPAWN_TICKS
 			p.ground = -1
 			p.velocity = Vector2.ZERO
-			p.wind = 0
-			p.anchor = 0
-			p.boosted = false
-			p.anchor_used = false
+			p.jetpack = 0
+			p.jetpack_tick = -1000
 			_event("fall", i, str(p.life))
 	if (state.players[0].finish >= 0.0 and state.players[1].finish >= 0.0) or (state.deadline >= 0.0 and float(state.tick) / HZ >= state.deadline):
 		state.ended = true
@@ -197,8 +196,7 @@ func _move_player(id: int, previous_ground: int) -> void:
 		p.last_island = landing
 		p.furthest = maxi(p.furthest, landing)
 		p.landing += 1
-		p.anchor_used = false
-		p.boosted = false
+		p.jetpack_tick = -1000
 		_event("land", id, str(p.landing))
 	p.position = end
 
@@ -235,8 +233,7 @@ func _contacts(before: Array) -> void:
 		state.owners[item.id] = winner
 		var p: Dictionary = state.players[winner]
 		if item.kind == 0: p.stars += 1
-		elif item.kind == 1: p.wind = 3
-		else: p.anchor = 3
+		elif item.kind == AdventurePowers.Kind.JETPACK: p.jetpack = AdventurePowers.CHARGES
 		_event("star" if item.kind == 0 else "artifact", winner, item.id, {"power_kind": item.kind, "position": item_at(item, t0 + hits[winner] * DT)})
 	for id in 2:
 		if is_inf(finish_hits[id]): continue

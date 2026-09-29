@@ -24,9 +24,9 @@ adb shell am start -n pl.zarajczyk.jumpingpenguin/com.godot.game.GodotAppLaunche
 - Drag in the direction you want to jump, usually up and to the right. A longer drag applies more force. Release to jump.
 - Start a drag anywhere outside the buttons. Moving your finger back to the starting point or dragging downward cancels the jump.
 - The arrow and meter show the direction and strength. There is no trajectory preview.
-- Collect the Bottle of Mischievous Wind above island 3 to receive three super-jumps. Tap **Super-skok**, then aim and release normally: the same gesture gives twice the height and same-height range. A purple arrow, meter, and **×2** mark the armed jump. Tap again, cancel the gesture, or pause to disarm without spending a charge.
-- Collect the Amber Anchor above island 5 for three flight interruptions. Tap **Kotwiczka** while airborne to stop all momentum and fall straight down under normal gravity. It can be used once per flight, including after a super-jump. Moving islands continue moving underneath you.
-- Each power button has three pearls showing its remaining charges. Powers are optional, work identically for every character, and reset on a new attempt or level. Collectibles return after a retry. Pausing preserves unused charges.
+- Each level contains two **jetpack** artifacts. Each pickup refills the jetpack to three uses.
+- Tap **Jetpack** to launch immediately from an island or in midair, including while falling. Every use replaces your velocity with a fixed jump at **60° above horizontal**, in the direction your character faces, at **50% of the maximum normal jump speed** (425 units/s). Use it near the apex to gain height and extend your jump; you can spend multiple charges during the same flight.
+- The backpack briefly appears with a cloud exhaust burst, then fades after 0.45 seconds. Three pearls on the button show the remaining uses. Jetpacks work identically for every character and in LAN races. A new attempt or level clears the inventory; pausing preserves it. Campaign collectibles return after a retry.
 - Islands keep moving while you aim. Falling into the water restarts the current level. Attempts are unlimited.
 - Each route has 10 small stars. Touch the large star on the final island to collect the eleventh star and finish the level. Landing on the final island alone is not enough.
 - The finish shows animated fireworks, confetti, and a victory screen with your character and star count. Levels unlock separately for each difficulty.
@@ -83,7 +83,7 @@ For a beginner-friendly, Polish walkthrough of publishing on Google Play, see [t
 - `scripts/gesture.gd`: 16-unit dead zone, full force at a 240-unit drag, maximum speed 850. Coordinates account for Godot viewport scaling.
 - `scripts/penguin.gd`: `CharacterBody2D`, gravity 1200, physics at 60 Hz, and no carry-over of island velocity when jumping.
 - `scripts/world.gd`: level flow, sinusoidal island motion, stars, resets, camera, and finish goal.
-- `scripts/powers.gd`: per-attempt power inventory and arming. `scripts/power_effects.gd`, `scripts/power_button.gd`, and `scripts/power_hud_effects.gd`: cloud/anchor effects, touch controls, and collection pearls. The camera zooms out for a boosted jump's predicted apex while keeping the ocean line stationary.
+- `scripts/powers.gd`: per-attempt jetpack inventory and fixed launch vector. `scripts/power_effects.gd`, `scripts/power_button.gd`, and `scripts/power_hud_effects.gd`: jetpack exhaust effects, touch controls, and collection pearls. The camera zooms out for a jetpack jump's predicted apex while keeping the ocean line stationary.
 - `resources/levels`: three route definitions. `resources/difficulties`: island widths, gaps, and movement for easy, medium, and hard. Adjust the balance without editing the UI.
 - `scripts/main.gd`: Polish-language UI, pause handling, safe margins, and app background handling.
 - `scripts/characters.gd`: character catalog. `scripts/fireworks.gd`: animated fireworks and confetti.
@@ -105,7 +105,7 @@ godot --path . --script tests/capture.gd
 
 See `docs/TEST_REPORT.md` for detailed results, tested devices, and limitations.
 
-Power-specific physics, charge, input, and camera checks are included in the same test command. To capture the artifacts, all six equipped characters, boost/anchor animations, and camera framing, run `godot --path . --script tests/capture_powers.gd`. Images are written to `build/powers-*.png`. Original power-art prompts are recorded in `docs/ART_POWERS.md`.
+Power-specific physics, charge, input, and camera checks are included in the same test command. To capture the artifacts, all six equipped characters, jetpack ignition animations, and camera framing, run `godot --path . --script tests/capture_powers.gd`. Images are written to `build/powers-*.png`. Original power-art prompts are recorded in `docs/ART_POWERS.md`.
 
 ## Assets and licences
 
