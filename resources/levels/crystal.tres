@@ -3,8 +3,7 @@
 [resource]
 script = ExtResource("1")
 id = 1
-wind_island = 5
-anchor_island = 1
+jetpack_islands = PackedInt32Array(1, 5)
 title = "Kryształowe Wyspy"
 subtitle = "Wśród błękitnych iskier"
 art = "crystal"

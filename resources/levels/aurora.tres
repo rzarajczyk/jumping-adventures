@@ -3,8 +3,7 @@
 [resource]
 script = ExtResource("1")
 id = 2
-wind_island = 3
-anchor_island = 4
+jetpack_islands = PackedInt32Array(3, 4)
 title = "Zorza nad Oceanem"
 subtitle = "Jeszcze jeden skok do gwiazd"
 art = "aurora"

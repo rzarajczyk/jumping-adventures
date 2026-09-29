@@ -1,12 +1,12 @@
 # Podniebny podróżnik — grafiki i dźwięk
 
-Grafiki utworzono wbudowanym `image_gen`; oryginalne PNG z przezroczystością są w `assets/art`. AtlasTexture przycina marginesy w silniku, bez modyfikowania plików źródłowych. Ikony przycisków wykorzystują te same grafiki plecaka i kotwiczki. Efekty chmur, linki, fali i perełek rysuje Godot.
+Grafiki utworzono wbudowanym `image_gen`; oryginalne PNG z przezroczystością są w `assets/art`. AtlasTexture przycina marginesy w silniku, bez modyfikowania plików źródłowych. Jetpack wykorzystuje `cloud_pack.png` jako artefakt, ikonę przycisku i chwilową nakładkę na postać. Przy wybiciu Godot rysuje dwa strumienie z dysz, obłoki oraz falę impulsu; plecak znika po 0,45 s. Grafiki butelki i kotwiczki poniżej zachowano jako archiwalne zasoby wcześniejszych mocy.
 
-## wind_bottle.png
+## wind_bottle.png (archiwalna)
 
 Use case: illustration-story. Asset type: isolated collectible sprite for a pastel kawaii children's 2D game, Jumping Adventure. Create ONE plump sky-blue glass bottle with a small warm cork and mint ribbon around the neck. Inside the bottle is one tiny fluffy spiral of white wind with a sweet simple smiling face. Soft lavender outlines, creamy highlights, gently painted storybook shading, polished readable silhouette at 56px. Front view slightly three-quarter right, entire object fills central 75% of square canvas. True transparent alpha background. No ground, no shadow outside silhouette, no scene, no lettering, no border, no other objects, no sparkles outside bottle. This is the magical Bottle of Mischievous Wind.
 
-## anchor.png
+## anchor.png (archiwalna)
 
 Use case: illustration-story. Asset type: isolated collectible sprite for a pastel kawaii children's 2D game, Jumping Adventure. ONE magical amber anchor charm, round soft blunt flukes, chubby proportions, round ring at the top, translucent honey amber material with one tiny white light trapped inside. Soft lavender purple outlining around the entire silhouette, warm cream highlights, softly painted storybook shading. A small mint ribbon tied beneath the top ring. Front view, very clear simple recognizable anchor shape at 56px. Entire anchor central 75% of square canvas. True transparent alpha background. No ground, no scene, no rope, no lettering, no shadow outside silhouette, no loose sparkles, no other objects.
 
@@ -16,4 +16,4 @@ Use case: illustration-story. Asset type: isolated equipment overlay sprite for 
 
 ## Dźwięk
 
-`tools/generate_audio.py` generuje deterministycznie `artifact.wav`, `super_jump.wav` i `anchor.wav`, bez zewnętrznych próbek dźwięku.
+`tools/generate_audio.py` generuje deterministycznie `artifact.wav`, `super_jump.wav` i `anchor.wav`, bez zewnętrznych próbek dźwięku. Jetpack korzysta z istniejącego odgłosu wybicia `super_jump.wav`; dźwięk kotwiczki nie jest używany.

@@ -76,13 +76,12 @@ func test_route(d: int, l: int) -> void:
 	root.add_child(world)
 	await frames(5)
 	check(world.islands.size() == 21 and world.stars.size() == 10, "route content %d/%d" % [d, l])
-	var wind_index := -1
-	var anchor_index := -1
-	for artifact in world.artifacts:
-		if artifact.kind == AdventurePowers.Kind.WIND: wind_index = artifact.island.index
-		elif artifact.kind == AdventurePowers.Kind.ANCHOR: anchor_index = artifact.island.index
 	var expected := ARTIFACT_PLACEMENTS[l]
-	check(world.artifacts.size() == 2 and wind_index == expected.x and anchor_index == expected.y, "artifact placements %d/%d" % [d, l])
+	var indices: Array[int] = []
+	for artifact in world.artifacts:
+		check(artifact.kind == AdventurePowers.Kind.JETPACK, "only jetpack artifacts %d/%d" % [d, l])
+		indices.append(artifact.island.index)
+	check(indices.size() == 2 and int(expected.x) in indices and int(expected.y) in indices, "artifact placements %d/%d" % [d, l])
 	check(world.player.can_jump(), "spawn stands on first island %d/%d" % [d, l])
 	for index in range(1, 21):
 		var island := world.islands[index]
@@ -114,7 +113,7 @@ func test_route(d: int, l: int) -> void:
 			await frames(6)
 	check(world.finished, "route completed %d/%d" % [d, l])
 	check(world.star_count == 11, "ten stars and finish star collectible %d/%d" % [d, l])
-	check(world.powers.wind == 3 and world.powers.anchor == 3, "ordinary route collects both artifacts without consuming powers %d/%d" % [d, l])
+	check(world.powers.jetpack == 3 and world.artifacts.all(func(item: Dictionary): return item.taken), "ordinary route collects both artifacts without consuming powers %d/%d" % [d, l])
 	print("Route %s / %s: finished=%s, stars=%d" % [PROFILE_PATHS[d], LEVEL_PATHS[l], world.finished, world.star_count])
 	root.remove_child(world)
 	world.queue_free()

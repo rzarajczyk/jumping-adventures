@@ -1,5 +1,15 @@
 # Raport weryfikacji — Jumping Adventure 1.1.0
 
+## Jetpack — 29 września 2026
+
+Super-skok i kotwiczkę zastępuje jetpack. Na każdej trasie są dwa artefakty uzupełniające zapas do trzech użyć. Jedno naciśnięcie ustawia prędkość 425 jednostek/s pod kątem 60° w kierunku zwrócenia postaci, na wyspie lub w dowolnej fazie lotu. Plecak z dwoma strumieniami z dysz pojawia się na 0,45 s; obłoki i fala podkreślają wybicie. Jetpack używa tego samego wektora dla wszystkich postaci.
+
+- `python3 tools/test.py`: **1388 sprawdzeń, 0 niepowodzeń**, wszystkie dziewięć tras ukończone z 11/11 gwiazdek. Sprawdzono dokładnie dwa jetpacki na każdej trasie i trudności, zbieranie w powietrzu, odnowienie zapasu przez drugi artefakt, trzy użycia podczas jednego lotu, siłę i kąt przy wznoszeniu/szczycie/opadaniu w obu kierunkach, zwykły skok bez zużywania mocy, reset po upadku oraz blokadę po mecie.
+- Pomiar rzeczywistej fizyki 60 Hz: skok `(300, -600)` osiągnął wysokość **145,03**, zasięg **300,04** i trwał **60 kroków**. Jetpack uruchomiony po 30 krokach zwiększył te wartości do **198,45**, **337,73** i **83 kroków**. Potwierdza to dodatkową wysokość, zasięg i czas lotu.
+- Dotyk i mysz: aktywacja na naciśnięciu, bez ponownego zużycia przy puszczeniu; użycie drugim palcem podczas celowania anuluje gest; puszczenie zwykłego skoku nad przyciskiem nie uruchamia jetpacka. Pauza i powrót z tła zachowują ładunki. Sprawdzono wygasanie animacji, ramowanie kamery, nieruchomą linię oceanu oraz lądowanie wszystkich sześciu postaci po dodatkowym wybiciu.
+
+Obejrzano zrzuty z Godota dla wszystkich sześciu postaci podczas użycia, po zniknięciu plecaka, obu artefaktów i kamery po kolejnych wybiciach. Rozdzielczości: **1280×720** i **1600×720**. Scenariusz: `tests/capture_powers.gd`; zrzuty: `build/powers-jetpack-*.png`, `build/powers-after-jetpack.png`, `build/powers-artifacts.png`, `build/powers-apex.png`, `build/powers-wide.png`.
+
 ## Podniebny podróżnik — 27 września 2026
 
 `python3 tools/test.py`: **1360 sprawdzeń, 0 niepowodzeń**, bez błędów skryptów i zasobów. Wszystkie dziewięć tras ukończono zwykłymi skokami z wynikiem **11/11 gwiazdek**, zbierając oba artefakty i zachowując po trzy niewykorzystane ładunki.

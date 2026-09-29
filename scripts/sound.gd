@@ -19,8 +19,8 @@ func _ready() -> void:
 		var player := AudioStreamPlayer.new()
 		add_child(player)
 		voices.append(player)
-	for name in ["jump", "land", "star", "splash", "win", "tap", "artifact", "super_jump", "anchor"]:
-		var path := "res://assets/audio/%s.wav" % name
+	for name in ["jump", "land", "star", "splash", "win", "tap", "artifact", "jetpack"]:
+		var path := "res://assets/audio/%s.wav" % ("super_jump" if name == "jetpack" else name)
 		if ResourceLoader.exists(path):
 			sounds[name] = load(path)
 	apply_settings()
