@@ -2,7 +2,7 @@
 
 Instrukcja dla osoby, która publikuje grę po raz pierwszy. Nazwy części menu Google Play Console mogą się nieznacznie zmieniać.
 
-Sprawdzone 25 września 2026 r. Wymagania i układ Play Console mogą się zmienić.
+Sprawdzone 29 września 2026 r. Wymagania i układ Play Console mogą się zmienić.
 
 ## Najważniejsze informacje o tym projekcie
 
@@ -62,11 +62,11 @@ Każdy kolejny plik wysyłany do tej samej aplikacji musi mieć większy `versio
 
 Wybierz właściwą aplikację, potem przejdź po zadaniach widocznych na jej panelu. Google może zmieniać nazwy i kolejność sekcji. Trzeba przygotować:
 
-- **Opis i nazwę sklepową.** „Jumping Adventure” ma limit 30 znaków, krótki opis 80, a pełny opis 4000. Przykładowy krótki opis: „Skacz między wyspami, zbieraj gwiazdki i poznawaj sześć zwierzęcych postaci.”
-- **Grafiki.** Ikona strony sklepu: PNG 512×512 px (maks. 1 MB). Grafika promocyjna: JPEG lub PNG bez przezroczystości 1024×500 px. Dodaj zrzuty ekranu rzeczywistej gry z telefonu; nie pokazuj funkcji, których aplikacja nie ma.
-- **Politykę prywatności.** W repozytorium nie ma jeszcze gotowej polityki prywatności ani linku do niej w grze. Przygotuj prawdziwy, publiczny URL (na przykład na stronie, którą kontrolujesz), dodaj go w Play Console i umieść dostępny z aplikacji link albo tekst. Nawet aplikacja, która nie zbiera danych, potrzebuje polityki i wypełnionego formularza Data safety.
-- **Data safety / Bezpieczeństwo danych.** Odpowiadaj na podstawie faktycznej wersji APK/AAB, w tym bibliotek i SDK. Obecna gra zapisuje postęp lokalnie, nie wysyła go do serwera i nie używa reklam, kont ani analityki; potwierdź jednak formularz zgodnie z listą danych w konkretnej wersji, którą publikujesz.
-- **Target audience / Odbiorcy.** Gra jest projektowana także dla dzieci w wieku 6–8 lat. Zaznacz grupy wiekowe zgodnie z rzeczywistym przeznaczeniem gry. Gdy choć jedna grupa obejmuje dzieci, obowiązują wymagania Google Play Families; nie deklaruj „nie dla dzieci” tylko po to, by ominąć te wymagania.
+- **Opis i nazwę sklepową.** Gotową polską propozycję nazwy oraz pełnego i krótkiego opisu znajdziesz w [`play_store/metadata/store-listing-pl.md`](../play_store/metadata/store-listing-pl.md).
+- **Grafiki.** Ikona 512×512, grafika 1024×500 i po cztery zrzuty gry dla telefonu oraz dużego ekranu znajdują się w [`play_store/assets/`](../play_store/assets/). Zrzuty pokazują aktualny jetpack, nie poprzednie moce. Zanim zgłosisz obsługę tabletów, sprawdź kadrowanie na urządzeniu/emulatorze dużego ekranu.
+- **Politykę prywatności.** Dwujęzyczny dokument roboczy znajduje się w [`play_store/metadata/privacy-policy.html`](../play_store/metadata/privacy-policy.html). Przed publikacją wpisz operatora i kontakt, opublikuj stronę pod publicznym adresem HTTPS oraz podłącz ją z poziomu gry i Play Console. Aplikacja 1.1.0 jeszcze nie ma wejścia do polityki w interfejsie.
+- **Data safety / Bezpieczeństwo danych.** Proponowane odpowiedzi dla gry jednoosobowej są w [`play_store/metadata/data-safety-and-app-content-pl.md`](../play_store/metadata/data-safety-and-app-content-pl.md). Skoryguj je w formularzu dla dokładnego AAB i potwierdź brak przesyłania danych poza urządzenie.
+- **Target audience / Odbiorcy.** Projekt zakłada poziom łatwy dla 6–8 lat i trudniejsze poziomy od 9 lat. Dopasuj sekcje Audience i Families do rzeczywistej jednoosobowej gry i jej odbiorców.
 - **Content rating / Klasyfikacja treści.** Wypełnij kwestionariusz IARC rzetelnie.
 - **App access / Dostęp do aplikacji.** Gra nie wymaga logowania; odpowiedz zgodnie z tym stanem.
 - **Ads / Reklamy.** Projekt nie ma reklam. Zaznacz ten stan i zmień odpowiedź, jeżeli reklamy zostaną kiedyś dodane.
@@ -95,8 +95,8 @@ Alternatywnie po testach można najpierw opublikować mały etap wdrażania prod
 
 1. Utworzyć nową aplikację w Play Console z pakietem `pl.zarajczyk.jumpingpenguin`.
 2. Podjąć świadomą decyzję o kluczu podpisu. Zmiana pakietu oznacza, że Android pokaże grę jako nową aplikację; stare instalacje `pl.rafal.jumpingpenguin` i ich lokalne zapisy nie zostaną automatycznie przeniesione.
-3. Przygotować publiczną politykę prywatności i dodać odnośnik dostępny z gry.
-4. Pobrać AAB z GitHub Release, przygotować ikonę sklepową, grafikę 1024×500 i zrzuty ekranu.
-5. Uzupełnić formularze, przeprowadzić testy i zlecić wydanie Google Play do sprawdzenia.
+3. Uzupełnić nazwę operatora i e-mail w polityce, opublikować jej URL, dodać dostęp w grze i zbudować kolejny AAB.
+4. Wgrać przygotowaną ikonę, grafikę, opisy i zrzuty ekranu z katalogu `play_store/`.
+5. Potwierdzić odpowiedzi formularzy, sprawdzić ujęcia na urządzeniu, przeprowadzić testy i zlecić wydanie Google Play do sprawdzenia.
 
 Wymogi sklepu i układ panelu zmieniają się. Przed wysłaniem sprawdź komunikaty w Play Console oraz aktualne [wymagania poziomu API](https://support.google.com/googleplay/android-developer/answer/11926878?hl=pl).
