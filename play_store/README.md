@@ -13,9 +13,9 @@ Przygotowany dla aplikacji `pl.zarajczyk.jumpingpenguin`, wersji 1.1.0 (version 
 - `assets/feature-graphic-1024x500.jpg` — grafika promocyjna 1024×500.
 - `assets/screenshots/phone/` — zrzuty ekranu telefonu.
 - `assets/screenshots/tablet/` — zrzuty ekranu dużego ekranu.
-- `assets/screenshots/alt-text-pl.md` — podpisy alternatywne do wklejenia w konsoli.
+- `metadata/alt-text-pl.md` — podpisy alternatywne do wklejenia w konsoli.
 
-Gotowy do testów bundle Android App Bundle jest w [`../build/JumpingAdventure.aab`](../build/JumpingAdventure.aab). To podpisany build wersji 1.1.0 (code 2). Przed wydaniem publicznym upewnij się, że klucz przesyłania odpowiada temu skonfigurowanemu w Play Console i podnieś version code.
+Bundle Android App Bundle powstaje po uruchomieniu `python3 tools/build_android.py` w `build/JumpingAdventure.aab`. GitHub Actions publikuje podpisany AAB dla aktualnego commita w Releases, z wersją `1.1.N` i kodem `1000000 + N`. Do testów użyj paczki zbudowanej z aktualnego kodu. Przed wydaniem publicznym upewnij się, że klucz przesyłania odpowiada temu skonfigurowanemu w Play Console i version code jest wyższy od poprzednio przesłanego.
 
 ## Przed publikacją
 

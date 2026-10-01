@@ -88,7 +88,7 @@ When replacing an original PNG, update its `AtlasTexture` regions in `scripts/ar
 
 ## Verification
 
-`python3 tools/test.py` runs tests in the Godot engine. It checks the process exit code, number of checks, and script errors, then writes a report to `build/test-results.txt`. The automated run plays through all nine routes and collects all 11 stars on each. It does not measure how comfortable the controls feel or whether the difficulty is balanced for children.
+`python3 tools/test.py` imports resources and creates the test save directory before running tests in the Godot engine, so it also works in a fresh checkout. It checks the process exit code, number of checks, and script errors, then writes reports to `build/test-import.txt` and `build/test-results.txt`. The automated run checks menu navigation, settings, saves, pause/restart, character selection and jetpacks, then plays through all nine routes and collects all 11 stars on each. GitHub Actions runs the same checks before building a release. The tests do not measure how comfortable the controls feel or whether the difficulty is balanced for children.
 
 To capture UI screenshots, run:
 

@@ -57,6 +57,7 @@ func _run() -> void:
 	save.records.clear()
 	save.load_progress()
 	check(save.best(1, 0).medals == 2 and not save.music_enabled and not save.effects_enabled, "save survives reload")
+	await test_menu_navigation()
 	await test_characters_and_migration()
 	for d in 3:
 		for l in 3:
@@ -67,6 +68,80 @@ func _run() -> void:
 	print("RESULT: %d checks, %d failures" % [checks, failures.size()])
 	for failure in failures: print("  " + failure)
 	get_tree().quit(0 if failures.is_empty() else 1)
+
+func menu_button(parent: Node, text: String) -> Button:
+	for node in parent.find_children("*", "Button", true, false):
+		if node.text == text:
+			return node
+	return null
+
+func click_button(button: Button) -> void:
+	check(is_instance_valid(button), "menu button exists")
+	if not is_instance_valid(button):
+		return
+	var at := button.get_global_rect().get_center()
+	for down in [true, false]:
+		var event := InputEventMouseButton.new()
+		event.button_index = MOUSE_BUTTON_LEFT
+		event.position = at
+		event.pressed = down
+		root.push_input(event, true)
+		await frames(1)
+	await frames(2)
+
+func press_back() -> void:
+	var event := InputEventKey.new()
+	event.keycode = KEY_ESCAPE
+	event.pressed = true
+	root.push_input(event, true)
+	await frames(2)
+
+func test_menu_navigation() -> void:
+	var save = root.get_node("Progress")
+	save.records.clear()
+	var game = load("res://main.tscn").instantiate()
+	root.add_child(game)
+	await frames(2)
+	for d in 3:
+		await click_button(game.stage.get_node("Difficulty%d" % d))
+		check(game.difficulty == d and game.screen == "home", "home chooses difficulty %d" % d)
+	await click_button(menu_button(game.stage, "Start   →"))
+	check(game.screen == "levels" and not is_instance_valid(game.world), "start opens level selection")
+	check(not game.stage.get_node("Level0").disabled and game.stage.get_node("Level1").disabled and game.stage.get_node("Level2").disabled, "fresh progress opens only the first route")
+	await press_back()
+	check(game.screen == "home", "back returns from level selection")
+	await click_button(menu_button(game.stage, "Dźwięk"))
+	check(is_instance_valid(game.modal), "home opens audio settings")
+	var previous_music: bool = save.music_enabled
+	await click_button(menu_button(game.modal, "Muzyka: " + ("włączona" if previous_music else "wyłączona")))
+	save.load_progress()
+	check(save.music_enabled != previous_music, "audio toggle survives save reload")
+	await press_back()
+	check(not is_instance_valid(game.modal) and game.screen == "home", "back closes home settings")
+	# Close the settings even when this regression fails, so later checks still run.
+	game._close_overlay()
+	await click_button(menu_button(game.stage, "Zmień postać"))
+	check(game.screen == "characters", "home opens character selection")
+	await press_back()
+	check(game.screen == "home", "back returns from character selection")
+	await click_button(menu_button(game.stage, "Start   →"))
+	await click_button(game.stage.get_node("Level0"))
+	check(game.screen == "game" and game.world.profile == game.PROFILES[2] and game.world.player.can_jump(), "menu starts selected difficulty on a grounded character")
+	await click_button(game.stage.get_node("PauseButton"))
+	await click_button(menu_button(game.modal, "Dźwięk"))
+	await click_button(menu_button(game.modal, "Gotowe"))
+	check(paused and game.pause_overlay, "closing audio settings restores pause menu")
+	await click_button(menu_button(game.modal, "Zacznij planszę od nowa"))
+	check(not paused and game.world.attempt == 1 and game.world.star_count == 0 and game.world.player.can_jump(), "pause menu restarts a playable route")
+	game.world.player.position = game.world.goal_position() + Vector2(0, 34)
+	game.world._check_goal()
+	check(game.screen == "victory" and save.unlocked(2, 1), "victory unlocks next route on selected difficulty")
+	await press_back()
+	check(game.screen == "levels" and not is_instance_valid(game.world), "back leaves victory for level selection")
+	game.show_home()
+	root.remove_child(game)
+	game.queue_free()
+	await frames(2)
 
 func test_route(d: int, l: int) -> void:
 	var world := PenguinWorld.new()

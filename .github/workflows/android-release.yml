@@ -31,6 +31,9 @@ jobs:
       - name: Download Godot and Android export templates
         run: python3 tools/bootstrap.py
 
+      - name: Verify single-player gameplay
+        run: python3 tools/test.py
+
       - name: Set release version
         env:
           RELEASE_NUMBER: ${{ github.run_number }}

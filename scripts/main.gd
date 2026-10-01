@@ -472,10 +472,12 @@ func _process(delta: float) -> void:
 			if splash_label.visible and is_instance_valid(hint_panel): hint_panel.visible = false
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
 		if is_instance_valid(world):
-			if pause_overlay: resume_game()
+			if world.finished: show_levels()
+			elif pause_overlay: resume_game()
 			else: pause_game()
+		elif is_instance_valid(modal): _close_overlay()
 		elif screen in ["levels", "characters"]: show_home()
 		get_viewport().set_input_as_handled()
 	# Complete a gesture even when the finger ends on top of a HUD button.

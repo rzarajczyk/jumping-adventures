@@ -1,5 +1,16 @@
 # Raport weryfikacji — Jumping Adventure 1.1.0
 
+## Wersja jednoosobowa — 1 października 2026
+
+Przejrzano wszystkie skrypty gry, zasoby poziomów, konfigurację eksportu, narzędzia, dokumentację i materiały sklepu. Obejrzano 18 źródłowych grafik PNG, ikonę sklepu, grafikę promocyjną oraz wszystkie osiem zrzutów telefonu i tabletu. Materiały i kod odpowiadają jednoosobowej grze offline. Oryginalne licencje bibliotek silnika zachowano w całości.
+
+- `python3 tools/test.py`: **1417 sprawdzeń, 0 niepowodzeń**, również w świeżej kopii projektu bez `.godot` i `build`. Wszystkie dziewięć tras ukończono z 11/11 gwiazdek. Testy obejmują fizykę, ruchome wyspy, sześć postaci, zapis i migrację postępu, jetpack, dotyk, pauzę, upadek i restart, powrót z tła oraz zwycięstwo.
+- Dodano sterowanie menu przez rzeczywiste zdarzenia wejścia: wybór trudności, Start, blokady tras, ustawienia dźwięku i ich zapis, wybór postaci, restart z pauzy oraz przejście z wyniku do wyboru trasy. Naprawiono Escape w ustawieniach ekranu głównego i na ekranie zwycięstwa; powtarzanie przytrzymanego klawisza nie przełącza pauzy.
+- Narzędzie testowe tworzy katalog zapisu i importuje zasoby przed uruchomieniem sceny. Usuwa to brak zapisu oraz timeout wynikający z nieprzygotowanej świeżej kopii projektu. GitHub Actions uruchamia testy przed zbudowaniem i opublikowaniem wydania.
+- Kontrola wizualna aktualnych ekranów w Godocie: menu główne, sześć postaci, wybór tras, rozgrywka, celowanie, pauza, wynik, duża gwiazda i szeroki ekran. Brak błędów skryptów i zasobów w logu renderowania.
+- GitHub Actions zbudował i podpisał APK/AAB dla commita `54c5fd0`, wydanie `v1.1.9`. Suma SHA-256 pobranego APK zgadza się z opublikowaną. Manifest APK nie deklaruje uprawnień sieci ani aparatu; pakiet zawiera wyłącznie skrypty gry jednoosobowej.
+- Na emulatorze Pixel 10 ARM64, Android 37, 2424×1080, sprawdzono uruchomienie tego APK w trybie samolotowym, Start, pierwszą trasę, dwa skoki dotykiem, zebranie gwiazdki i artefaktu wypełniającego trzy ładunki jetpacka. Fizycznego telefonu w tej weryfikacji nie używano.
+
 ## Jetpack — 29 września 2026
 
 Super-skok i kotwiczkę zastępuje jetpack. Na każdej trasie są dwa artefakty uzupełniające zapas do trzech użyć. Jedno naciśnięcie ustawia prędkość 425 jednostek/s pod kątem 60° w kierunku zwrócenia postaci, na wyspie lub w dowolnej fazie lotu. Plecak z dwoma strumieniami z dysz pojawia się na 0,45 s; obłoki i fala podkreślają wybicie. Jetpack używa tego samego wektora dla wszystkich postaci.
