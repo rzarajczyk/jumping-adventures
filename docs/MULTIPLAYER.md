@@ -73,4 +73,8 @@ ZXing Android Embedded 4.3.0 i zależności są w APK. Pierwszy build pobiera za
 
 Testy porównują fizykę z `CharacterBody2D` i uruchamiają osobne procesy hosta/klienta. Przekaźnik UDP dodaje RTT 150 ms, jitter do ±40 ms, stratę 2%, duplikację i zmianę kolejności. Dodatkowy scenariusz odcina jeden kierunek. Raporty: `build/race-tests.txt`, `build/network-*.txt`; zrzuty: `build/race-*.png`. `--network-only` pomija testy fizyki. Na komputerze dostępne są kopiowanie i wklejanie kodu połączenia.
 
+Pomiar reakcji wymaga co najmniej 20 obserwacji na obu urządzeniach i zachowuje limit p95 równy 200 ms. Procesy wymieniają liczbę obserwacji i wysyłają dodatkowe skoki po utracie pakietów, zamiast kończyć po stałej liczbie prób. Limit wynosi 48 prób oraz 35 sekund pomiaru, w ramach 80 sekund na cały scenariusz. Każdy scenariusz sprawdza również pauzę i wznowienie rewanżu przed świadomym wyjściem.
+
+Przy błędzie lub przekroczeniu czasu narzędzie wypisuje logi obu procesów. Logi zawierają etap testu, fazę sesji, generację połączenia, gotowość, liczbę prób, wykonań i obserwacji oraz czas od ostatniego potwierdzenia. GitHub Actions zachowuje raporty i logi silnika w artefakcie `verification-logs` przez 14 dni, także po nieudanej weryfikacji.
+
 Odbiór na dwóch fizycznych telefonach wymaga jeszcze QR bez Internetu, routera i hotspotu w obu rolach, pełnej rundy/rewanżu, uśpienia obu telefonów, powrotu po ponad minucie oraz pomiaru wydajności i rzeczywistego obrazu. Pomiary prezentacji w procesach Godota nie mierzą czasu wyświetlacza telefonu.

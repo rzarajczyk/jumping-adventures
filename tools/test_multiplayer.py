@@ -104,6 +104,9 @@ def run_network(base, build, impaired, blackout=False):
     trigger.unlink(missing_ok=True)
     relay = ImpairedUDP(blackout) if impaired else None
     suffix = "-one-way" if blackout else ("-impaired" if impaired else "")
+    outputs = {}
+    exit_codes = {}
+    print(f"NETWORK SCENARIO: {'one-way outage' if blackout else ('impaired' if impaired else 'normal')}", flush=True)
     try:
         for role in ["host", "client"]:
             log = (build / f"network-{role}{suffix}.txt").open("w")
@@ -114,26 +117,38 @@ def run_network(base, build, impaired, blackout=False):
                 while not invite.exists() and process.poll() is None and time.monotonic() < end:
                     time.sleep(0.05)
                 assert invite.exists(), "host did not produce invitation"
-        hashes = []
+        deadline = time.monotonic() + 90
         for role, process, log in processes:
-            code = process.wait(timeout=90)
-            log.close()
-            output = (build / f"network-{role}{suffix}.txt").read_text()
-            print(output)
-            assert code == 0 and "NETWORK PASS" in output and "SCRIPT ERROR" not in output and "ERROR:" not in output, f"{role} network test failed"
-            hashes.append(re.search(r"hash=([0-9a-f]+)", output)[1])
-        assert hashes[0] == hashes[1], "peers ended with different canonical states"
-        print(f"NETWORK PASS: {'one-way outage' if blackout else ('impaired' if impaired else 'normal')} transport")
+            exit_codes[role] = process.wait(timeout=max(0, deadline - time.monotonic()))
     finally:
         for _, process, log in processes:
             if process.poll() is None:
                 process.terminate()
-                process.wait(timeout=5)
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=5)
             log.close()
+        # Print every peer even on setup errors, nonzero exits, or timeouts.
+        # Validating the host first used to discard the client's failure state.
+        for role, _, _ in processes:
+            output = (build / f"network-{role}{suffix}.txt").read_text()
+            outputs[role] = output
+            print(f"NETWORK LOG: {role}{suffix}\n{output}", flush=True)
         invite.unlink(missing_ok=True)
         trigger.unlink(missing_ok=True)
         if relay:
             relay.close()
+    hashes = []
+    for role, _, _ in processes:
+        output = outputs[role]
+        code = exit_codes[role]
+        summary = re.search(r"NETWORK PASS .* hash=([0-9a-f]+)", output)
+        assert code == 0 and summary and "SCRIPT ERROR" not in output and "ERROR:" not in output, f"{role} network test failed (exit {code}); see build/network-{role}{suffix}.txt"
+        hashes.append(summary[1])
+    assert hashes[0] == hashes[1], "peers ended with different canonical states"
+    print(f"NETWORK PASS: {'one-way outage' if blackout else ('impaired' if impaired else 'normal')} transport", flush=True)
 
 
 if __name__ == "__main__":
