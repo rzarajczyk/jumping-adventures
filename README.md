@@ -1,105 +1,45 @@
 # Jumping Adventure
 
-A 2D Android game about six friends, floating islands, and the ocean. Explore three hand-designed routes across three difficulty levels, with original kawaii artwork, animation, music, and sound effects. The game works completely offline.
+An offline 2D Android game with six playable characters, three floating-island routes, and three difficulty levels. Drag and release to jump, collect stars, and use jetpacks to reach the final star and unlock the next route. Features original artwork, animation, music, and a Polish interface.
 
-## Install on Android
+![A penguin uses a jetpack to jump between floating islands and collect stars](play_store/assets/feature-graphic-1024x500.jpg)
 
-1. Copy `build/JumpingAdventure.apk` to a phone running Android 9 or later with an ARM64 processor.
-2. Open the APK in the Files app. If prompted, allow that app to install apps from this source.
-3. Tap **Install**, then launch **Jumping Adventure**. Play with the phone in landscape orientation.
+## Install
 
-The APK is signed with the project's local signing key. The current Android package ID is `pl.zarajczyk.jumpingpenguin`, which differs from earlier releases (`pl.rafal.jumpingpenguin`). Android treats it as a separate app: the older installation and its local progress stay on the phone, and the new installation starts with its own save. Future APK updates for the new package can be installed over it when signed with the same key. On desktop, the game keeps using the previous Godot data directory, `Godot/app_userdata/Jumping Penguin`.
+Requires **Android 9 or later** and an **ARM64** device.
 
-With USB debugging enabled on a connected phone, install and launch the game with:
+1. Download the **APK** from [GitHub Releases](https://github.com/rzarajczyk/jumping-adventures/releases/latest).
+2. Open it on your phone, allow installation from that source if prompted, and tap **Install**.
+3. Launch **Jumping Adventure** and play in landscape orientation.
 
-```sh
-adb install -r build/JumpingAdventure.apk
-adb shell am start -n pl.zarajczyk.jumpingpenguin/com.godot.game.GodotAppLauncher
-```
+Use the APK for installation; the AAB is intended for Google Play uploads.
 
-## How to play
+## Build
 
-- Choose a character: penguin, whale, capybara, kitten, puppy, or panda. Your choice is saved. All characters use the same physics and have three animation frames.
-- Choose a difficulty and an unlocked level.
-- Drag in the direction you want to jump, usually up and to the right. A longer drag applies more force. Release to jump.
-- Start a drag anywhere outside the buttons. Moving your finger back to the starting point or dragging downward cancels the jump.
-- The arrow and meter show the direction and strength. There is no trajectory preview.
-- Each level contains two **jetpack** artifacts. Each pickup refills the jetpack to three uses.
-- Tap **Jetpack** to launch immediately from an island or in midair, including while falling. Every use replaces your velocity with a fixed jump at **60° above horizontal**, in the direction your character faces, at **50% of the maximum normal jump speed** (425 units/s). Use it near the apex to gain height and extend your jump; you can spend multiple charges during the same flight.
-- The backpack briefly appears with a cloud exhaust burst, then fades after 0.45 seconds. Three pearls on the button show the remaining uses. Jetpacks work identically for every character. A new attempt or level clears the inventory; pausing preserves it. Campaign collectibles return after a retry.
-- Islands keep moving while you aim. Falling into the water restarts the current level. Attempts are unlimited.
-- Each route has 10 small stars. Touch the large star on the final island to collect the eleventh star and finish the level. Landing on the final island alone is not enough.
-- The finish shows animated fireworks, confetti, and a victory screen with your character and star count. Levels unlock separately for each difficulty.
-- The pause menu stops the level and lets you change audio, restart the level, or choose another level.
+The build helpers support **macOS**. Install **Python 3.11+**, **Temurin JDK 21**, and the Android SDK with **Platform 36**, **Build Tools 36.1.0**, and **Platform Tools**; accept the SDK licences. Android Studio can install the SDK packages.
 
-Easy is designed for ages 6–8; medium and hard are for ages 9 and up. Each route has 20 jumps across 21 islands. A successful run is designed to take 90–150 seconds, including aiming time, with no time limit. This is a design target to validate with children, not a measured result.
-
-## Open and run the project
-
-Install **Godot 4.7.2 Standard** (not .NET) for your operating system. In the Godot Project Manager, import this project by selecting `project.godot`, then run it. On desktop, aim with the left mouse button; press Escape to pause.
-
-If Godot is available on your command line, you can also run:
+Run from the repository root:
 
 ```sh
-godot --path .
-```
-
-The helper `python3 tools/bootstrap.py` downloads the official macOS Godot editor 4.7.2 and Android export templates, verifies their SHA512 checksums, and extracts the files needed for Android. The download is about 1.4 GB. This bootstrap helper currently supports macOS; on other operating systems, install the matching Godot editor and export templates for your platform. Do not add `.tools` to the repository or source archive.
-
-## Build Android APK and AAB
-
-To export Android, install JDK 21 (the templates use Java 17), Android SDK Platform 36, Build Tools 36.1.0, Platform Tools, and accept the SDK licences. Android Studio can install these packages. Install the export templates matching Godot 4.7.2 and configure the Android SDK and Java SDK paths in Godot's Editor Settings. Godot uses the included libraries; the engine is not compiled from C++.
-
-For a manual export on any operating system, open **Project > Export** and select **Android** for an APK or **Android AAB** for a Play Store bundle. These presets point to custom Godot templates under `.tools/templates/`; install the matching Android templates there or update the preset's custom template paths for your machine. The files are written to `build/JumpingAdventure.apk` and `build/JumpingAdventure.aab`.
-
-The repeatable command-line build helper is currently configured for macOS and uses Gradle 8.11.1. It exports and verifies both the APK and AAB:
-
-```sh
+python3 tools/bootstrap.py
 python3 tools/test.py
 python3 tools/build_android.py
 ```
 
-The build helper imports project assets, prepares the Gradle project, exports a release APK and AAB, and verifies both signatures. Its executable, SDK, and JDK paths can be overridden with `PENGUIN_GODOT`, `PENGUIN_ANDROID_SDK`, and `PENGUIN_JAVA`. The Godot executable used by the helper must use a local `_sc_` data directory under `.tools`.
+Bootstrap downloads and verifies Godot **4.7.2 Standard** and its Android export templates (about 1.4 GB). The build produces signed `build/JumpingAdventure.apk` and `build/JumpingAdventure.aab` and verifies their signatures.
 
-The signing key `.tools/jumping-penguin.keystore` and its password file `.tools/signing.json` are created once. **Keep private backups of both files** so future builds can update installations with the same package ID. They are not included in the APK, source archive, or repository. App ID: `pl.zarajczyk.jumpingpenguin`; version: `1.1.0` (version code 2); minimum SDK: 28; target SDK: 36; ABI: `arm64-v8a`.
+For custom SDK or JDK locations, set `PENGUIN_ANDROID_SDK` and `PENGUIN_JAVA`. Keep private backups of `.tools/jumping-penguin.keystore` and `.tools/signing.json` to preserve the signing key for future updates.
 
-## Automated GitHub releases
+Every push to `master` runs the tests and publishes signed APK/AAB files to GitHub Releases.
 
-Once the repository secrets below are configured, every push to `master` builds a signed APK and AAB on a macOS runner and publishes both in a GitHub Release. Releases are tagged `v1.1.N`, where `N` is the workflow run number; each artifact gets a monotonically increasing Android version code and a SHA-256 checksum file. Upload the AAB asset to Play Console; the workflow does not publish directly to Google Play.
+## Test
 
-Add `ANDROID_KEYSTORE_BASE64` (the keystore encoded as one-line Base64) and `ANDROID_KEYSTORE_PASSWORD` under **Settings > Secrets and variables > Actions** to sign the APK with the existing project key. The workflow uses the key's non-secret alias, `penguin`. Keep the keystore and password private; never commit them.
-
-For a beginner-friendly, Polish walkthrough of publishing on Google Play, see [the Google Play publishing guide](docs/GOOGLE_PLAY_PUBLISHING_PL.md).
-
-## Project structure and tuning
-
-- `scripts/gesture.gd`: 16-unit dead zone, full force at a 240-unit drag, maximum speed 850. Coordinates account for Godot viewport scaling.
-- `scripts/penguin.gd`: `CharacterBody2D`, gravity 1200, physics at 60 Hz, and no carry-over of island velocity when jumping.
-- `scripts/world.gd`: level flow, sinusoidal island motion, stars, resets, camera, and finish goal.
-- `scripts/powers.gd`: per-attempt jetpack inventory and fixed launch vector. `scripts/power_effects.gd`, `scripts/power_button.gd`, and `scripts/power_hud_effects.gd`: jetpack exhaust effects, touch controls, and collection pearls. The camera zooms out for a jetpack jump's predicted apex while keeping the ocean line stationary.
-- `resources/levels`: three route definitions. `resources/difficulties`: island widths, gaps, and movement for easy, medium, and hard. Adjust the balance without editing the UI.
-- `scripts/main.gd`: Polish-language UI, pause handling, safe margins, and app background handling.
-- `scripts/characters.gd`: character catalog. `scripts/fireworks.gd`: animated fireworks and confetti.
-- `scripts/progress.gd`: local save at `user://progress.cfg`, separate progress for each difficulty, written through a temporary file.
-- `assets/art`: original PNG artwork, including three penguin frames. `docs/ART_ADVENTURE.md` contains the prompts used with the built-in image generator.
-- `tools/generate_audio.py`: reproducible generator for the original 40-second music loop and nine sound effects; it uses only the Python standard library.
-
-When replacing an original PNG, update its `AtlasTexture` regions in `scripts/art.gd`. The bright rim marks each island's physical landing surface. The game uses the Compatibility renderer.
-
-## Verification
-
-`python3 tools/test.py` imports resources and creates the test save directory before running tests in the Godot engine, so it also works in a fresh checkout. It checks the process exit code, number of checks, and script errors, then writes reports to `build/test-import.txt` and `build/test-results.txt`. The automated run checks menu navigation, settings, saves, pause/restart, character selection and jetpacks, then plays through all nine routes and collects all 11 stars on each. GitHub Actions runs the same checks before building a release. The tests do not measure how comfortable the controls feel or whether the difficulty is balanced for children.
-
-To capture UI screenshots, run:
+After bootstrap, run:
 
 ```sh
-godot --path . --script tests/capture.gd
+python3 tools/test.py
 ```
 
-See `docs/TEST_REPORT.md` for detailed results, tested devices, and limitations.
+The suite imports assets, checks menus, saves, physics, characters, jetpacks, touch input, pause and restart, then completes all nine routes with 11/11 stars each. It fails on test failures or script errors. Logs are written to `build/test-import.txt` and `build/test-results.txt`.
 
-Power-specific physics, charge, input, and camera checks are included in the same test command. To capture the artifacts, all six equipped characters, jetpack ignition animations, and camera framing, run `godot --path . --script tests/capture_powers.gd`. Images are written to `build/powers-*.png`. Original power-art prompts are recorded in `docs/ART_POWERS.md`.
-
-## Assets and licences
-
-The artwork was created with the built-in image generator. The original music and sound effects were created with the project's audio generator. Nunito is licensed under the SIL Open Font License (`assets/fonts/OFL.txt`). Godot and third-party licence notices are in `assets/licenses` and are included in the APK. The project has no network services, analytics, ads, or in-app purchases.
+For manual playtesting, import `project.godot` in Godot 4.7.2 Standard and run the project. Use the left mouse button to aim and jump; Escape pauses. See the [test report](docs/TEST_REPORT.md) for results and device-testing limitations.
