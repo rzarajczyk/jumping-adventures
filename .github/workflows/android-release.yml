@@ -131,26 +131,24 @@ jobs:
               --repo "$GITHUB_REPOSITORY"
           fi
 
-      # Google Play upload is disabled until the Play Console app and credentials are ready.
-      # To enable it, configure GOOGLE_SERVICE_ACCOUNT_JSON and restore these steps.
-      # - name: Check Google Play upload configuration
-      #   id: play_upload
-      #   env:
-      #     GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-      #   run: |
-      #     if [ -n "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
-      #       echo "enabled=true" >> "$GITHUB_OUTPUT"
-      #     else
-      #       echo "enabled=false" >> "$GITHUB_OUTPUT"
-      #       echo "::notice::Google Play upload skipped; configure GOOGLE_SERVICE_ACCOUNT_JSON after initializing the app in Play Console."
-      #     fi
-      #
-      # - name: Publish to Google Play internal testing
-      #   if: steps.play_upload.outputs.enabled == 'true'
-      #   uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
-      #   with:
-      #     serviceAccountJsonPlainText: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-      #     packageName: pl.zarajczyk.jumpingpenguin
-      #     releaseFiles: build/JumpingAdventure.aab
-      #     tracks: internal
-      #     releaseName: Jumping Adventure 1.1.${{ github.run_number }}
+      - name: Check Google Play upload configuration
+        id: play_upload
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -n "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Google Play upload skipped; configure GOOGLE_SERVICE_ACCOUNT_JSON after initializing the app in Play Console."
+          fi
+
+      - name: Publish to Google Play internal testing
+        if: steps.play_upload.outputs.enabled == 'true'
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          packageName: pl.zarajczyk.jumpingpenguin
+          releaseFiles: build/JumpingAdventure.aab
+          tracks: internal
+          releaseName: Jumping Adventure 1.1.${{ github.run_number }}
