@@ -1,5 +1,16 @@
 # Raport weryfikacji — Jumping Adventure 1.1.0
 
+## Wydra, bóbr i przewijanie postaci — 4 października 2026
+
+Dodano dwie grywalne postacie z klatkami spoczynku, mrugania i skoku. Lista ośmiu zwierząt zachowuje czytelne rozmiary kart i przewija się palcem, kółkiem myszy, paskiem oraz strzałkami. Wybór zachowuje pozycję listy; ponowne otwarcie pokazuje zapisaną postać.
+
+- `python3 tools/test.py`: **1481 sprawdzeń, 0 niepowodzeń**, bez błędów skryptów i zasobów. Wszystkie dziewięć tras ukończono z **11/11 gwiazdek**.
+- Testy zdarzeń wejścia obejmują przewinięcie do ostatniego zwierzaka i powrót, kółko myszy, długie i krótkie przesunięcie palcem bez przypadkowego wyboru, anulowany dotyk oraz wybranie wydry dotknięciem po przewinięciu. Obsługa gestów działa przy wyłączonej emulacji myszy z dotyku.
+- Wszystkie osiem postaci sprawdzono pod kątem wyboru prawdziwym kliknięciem widocznej karty, zapisu/odczytu, trzech klatek, skoku, lądowania, restartu, zwycięstwa i jetpacka.
+- Obejrzano menu przy 1280×720 i 1600×720 oraz obie nowe postacie na wyspie i w locie z plecakiem. Podglądy: `build/characters-beaver-selected.png`, `build/new-characters-wide.png`, `build/character-otter.png`, `build/character-beaver.png`, `build/new-jetpack-otter.png`, `build/new-jetpack-beaver.png`.
+
+Weryfikację wykonano na macOS w silniku Godot. W tej zmianie nie przebudowano APK/AAB ani nie testowano na fizycznym urządzeniu z Androidem.
+
 ## Zmiana parametrów jetpacka — 4 października 2026
 
 Zwiększono prędkość wybicia z 425 do 850 jednostek/s, zachowując kąt 60°. Każdy artefakt dodaje trzy ładunki do posiadanego zapasu: dwa zebrane plecaki dają sześć użyć, a zebranie drugiego przy dwóch pozostałych ładunkach daje pięć. Przycisk pokazuje dokładną liczbę dostępnych użyć. Czas animacji wynosi 0,45 s.

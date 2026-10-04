@@ -297,11 +297,16 @@ func test_characters_and_migration() -> void:
 	save.effects_enabled = false
 	var game = load("res://main.tscn").instantiate()
 	root.add_child(game)
+	await test_character_scrolling(game)
 	for id in AdventureCharacters.IDS:
 		game.show_characters()
-		var card: Button = game.stage.get_node("Character_" + id)
-		check(Rect2(Vector2.ZERO, game.stage.size).encloses(card.get_rect()), "character card fits on screen " + id)
-		card.pressed.emit()
+		await frames(3)
+		var scroll: ScrollContainer = game.stage.get_node("CharacterScroll")
+		var card: Button = scroll.get_node("Cards/Character_" + id)
+		scroll.ensure_control_visible(card)
+		await frames(2)
+		check(scroll.get_global_rect().encloses(card.get_global_rect()), "character card can be fully scrolled into view " + id)
+		await click_button(card)
 		check(save.selected_character == id, "character card selects " + id)
 		save.load_progress()
 		check(save.selected_character == id, "character survives save/reload " + id)
@@ -328,3 +333,103 @@ func test_characters_and_migration() -> void:
 	root.remove_child(game)
 	game.queue_free()
 	await frames(2)
+
+func test_character_scrolling(game: Node) -> void:
+	var save = root.get_node("Progress")
+	save.select_character("penguin")
+	game.show_characters()
+	await frames(3)
+	var scroll: ScrollContainer = game.stage.get_node("CharacterScroll")
+	check(scroll.get_h_scroll_bar().max_value > scroll.get_h_scroll_bar().page, "character roster overflows into a scrollable list")
+	check(game.stage.get_node("PreviousCharacters").disabled and not game.stage.get_node("NextCharacters").disabled, "only forward arrow enabled at start of roster")
+	await click_button(game.stage.get_node("NextCharacters"))
+	var beaver: Button = scroll.get_node("Cards/Character_beaver")
+	check(scroll.get_global_rect().encloses(beaver.get_global_rect()), "forward arrow reveals last animal")
+	check(game.stage.get_node("NextCharacters").disabled, "forward arrow disabled at end of roster")
+	var previous_offset := scroll.scroll_horizontal
+	await click_button(beaver)
+	scroll = game.stage.get_node("CharacterScroll")
+	check(save.selected_character == "beaver" and scroll.scroll_horizontal == previous_offset, "selecting last animal preserves scroll position")
+	game.show_home()
+	game.show_characters()
+	await frames(3)
+	scroll = game.stage.get_node("CharacterScroll")
+	beaver = scroll.get_node("Cards/Character_beaver")
+	check(scroll.get_global_rect().encloses(beaver.get_global_rect()), "reopening roster reveals saved selection")
+	await click_button(game.stage.get_node("PreviousCharacters"))
+	check(scroll.scroll_horizontal == 0, "back arrow returns to first animals")
+	var wheel := InputEventMouseButton.new()
+	wheel.button_index = MOUSE_BUTTON_WHEEL_DOWN
+	wheel.pressed = true
+	wheel.position = scroll.get_global_rect().get_center()
+	root.push_input(wheel, true)
+	await frames(3)
+	check(scroll.scroll_horizontal > 0, "mouse wheel scrolls horizontally over animal cards")
+	scroll.scroll_horizontal = 0
+	await frames(2)
+	# Start on an actual button and release over the list: scrolling must cancel selection.
+	var start: Vector2 = scroll.get_node("Cards/Character_puppy").get_global_rect().get_center()
+	var touch := InputEventScreenTouch.new()
+	touch.index = 4
+	touch.position = start
+	touch.pressed = true
+	root.push_input(touch, true)
+	await frames(1)
+	for i in range(1, 5):
+		var drag := InputEventScreenDrag.new()
+		drag.index = 4
+		drag.position = start - Vector2(i * 90, 0)
+		drag.relative = Vector2(-90, 0)
+		root.push_input(drag, true)
+		await frames(1)
+	touch = InputEventScreenTouch.new()
+	touch.index = 4
+	touch.position = start - Vector2(360, 0)
+	root.push_input(touch, true)
+	await frames(30)
+	check(scroll.scroll_horizontal > 0, "touch swipe scrolls the animal cards")
+	check(save.selected_character == "beaver", "touch swipe does not accidentally select an animal")
+	# A separate tap must still select a new animal after the swipe.
+	var otter: Button = scroll.get_node("Cards/Character_otter")
+	scroll.ensure_control_visible(otter)
+	await frames(2)
+	for down in [true, false]:
+		touch = InputEventScreenTouch.new()
+		touch.index = 4
+		touch.position = otter.get_global_rect().get_center()
+		touch.pressed = down
+		root.push_input(touch, true)
+		await frames(1)
+	await frames(3)
+	check(save.selected_character == "otter", "touch tap selects otter after scrolling")
+	scroll = game.stage.get_node("CharacterScroll")
+	scroll.scroll_horizontal = 0
+	await frames(2)
+	start = scroll.get_node("Cards/Character_puppy").get_global_rect().get_center()
+	touch = InputEventScreenTouch.new()
+	touch.index = 4
+	touch.position = start
+	touch.pressed = true
+	root.push_input(touch, true)
+	await frames(1)
+	var short_drag := InputEventScreenDrag.new()
+	short_drag.index = 4
+	short_drag.position = start - Vector2(28, 0)
+	short_drag.relative = Vector2(-28, 0)
+	root.push_input(short_drag, true)
+	await frames(1)
+	touch = InputEventScreenTouch.new()
+	touch.index = 4
+	touch.position = short_drag.position
+	root.push_input(touch, true)
+	await frames(2)
+	check(scroll.scroll_horizontal > 0 and save.selected_character == "otter", "short swipe ending inside the same card cancels selection")
+	for down in [true, false]:
+		touch = InputEventScreenTouch.new()
+		touch.index = 4
+		touch.position = scroll.get_node("Cards/Character_puppy").get_global_rect().get_center()
+		touch.pressed = down
+		touch.canceled = not down
+		root.push_input(touch, true)
+		await frames(1)
+	check(save.selected_character == "otter", "canceled touch does not select an animal")

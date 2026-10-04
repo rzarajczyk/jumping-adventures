@@ -204,24 +204,73 @@ func show_home() -> void:
 	choose.name = "ChooseCharacter"
 	_label(stage, "%d przyjaciół   ·   3 krainy   ·   mnóstwo gwiazdek" % AdventureCharacters.IDS.size(), Rect2(83, 635, 730, 36), 20, INK)
 
-func show_characters() -> void:
+func show_characters(scroll_offset: int = -1) -> void:
 	_leave_world()
 	_clear()
 	screen = "characters"
 	_button(stage, "←  Wróć", Rect2(58, 38, 147, 56), show_home)
-	_label(stage, "Kto dziś wyrusza w przygodę?", Rect2(64, 126, 1150, 70), 44, INK, true)
-	_label(stage, "Każdy skacze tak samo dobrze. Wybierz swojego przyjaciela!", Rect2(67, 197, 1140, 36), 22, MUTED)
+	_label(stage, "Kto dziś wyrusza w przygodę?", Rect2(64, 126, 970, 70), 44, INK, true)
+	_label(stage, "Każdy skacze tak samo dobrze. Przesuń listę, by poznać wszystkich!", Rect2(67, 197, 1140, 36), 22, MUTED)
+	var scroll := CharacterScroll.new()
+	scroll.name = "CharacterScroll"
+	scroll.position = Vector2(48, 252)
+	scroll.size = Vector2(1184, 350)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.scroll_horizontal_by_default = true
+	scroll.scroll_deadzone = 12
+	stage.add_child(scroll)
+	var cards := Control.new()
+	cards.name = "Cards"
+	cards.mouse_filter = Control.MOUSE_FILTER_PASS
 	var card_gap := 14.0
-	var card_width := (stage.size.x - 96.0 - card_gap * (AdventureCharacters.IDS.size() - 1)) / AdventureCharacters.IDS.size()
+	var card_width := 186.0
+	cards.custom_minimum_size = Vector2(20 + AdventureCharacters.IDS.size() * (card_width + card_gap) - card_gap, 334)
+	scroll.add_child(cards)
+	var selected_card: Button
 	for i in AdventureCharacters.IDS.size():
 		var id: String = AdventureCharacters.IDS[i]
 		var selected := id == Progress.selected_character
-		var card := _button(stage, "", Rect2(48 + i * (card_width + card_gap), 268, card_width, 303), func(): Progress.select_character(id); show_characters(), selected)
+		var card := _button(cards, "", Rect2(10 + i * (card_width + card_gap), 16, card_width, 303), func(): Progress.select_character(id); show_characters(scroll.scroll_horizontal), selected)
 		card.name = "Character_" + id
+		# Let wheel and trackpad events reach the scrolling parent.
+		card.mouse_filter = Control.MOUSE_FILTER_PASS
+		if selected:
+			selected_card = card
 		_character_picture(card, id, Rect2(20, 24, card_width - 40, 174))
 		_label(card, AdventureCharacters.NAMES[i], Rect2(10, 209, card_width - 20, 40), 27, CREAM if selected else INK, true).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_label(card, "✓  Wybrano" if selected else "Wybierz mnie", Rect2(10, 256, card_width - 20, 30), 18, CREAM if selected else MUTED).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var previous := _button(stage, "←", Rect2(1066, 134, 68, 56), func(): scroll.scroll_horizontal -= 600)
+	previous.name = "PreviousCharacters"
+	previous.tooltip_text = "Poprzednie zwierzaki"
+	var next := _button(stage, "→", Rect2(1150, 134, 68, 56), func(): scroll.scroll_horizontal += 600)
+	next.name = "NextCharacters"
+	next.tooltip_text = "Kolejne zwierzaki"
+	var bar := scroll.get_h_scroll_bar()
+	var track := _box(Color(0.22, 0.55, 0.51, 0.12), 6, false)
+	track.content_margin_top = 6
+	track.content_margin_bottom = 6
+	bar.add_theme_stylebox_override("scroll", track)
+	for style in ["grabber", "grabber_highlight", "grabber_pressed"]:
+		bar.add_theme_stylebox_override(style, _box(TEAL, 6, false))
+	var update_arrows := func():
+		previous.disabled = scroll.scroll_horizontal <= 0
+		next.disabled = scroll.scroll_horizontal >= bar.max_value - bar.page
+	bar.value_changed.connect(func(_value: float): update_arrows.call())
+	bar.changed.connect(update_arrows)
+	update_arrows.call()
+	_restore_character_scroll(scroll, selected_card, scroll_offset)
 	_button(stage, "Ruszamy!   →", Rect2(430, 614, 420, 64), show_levels, true)
+
+func _restore_character_scroll(scroll: ScrollContainer, selected_card: Button, offset: int) -> void:
+	# Scroll limits and child rectangles are ready only after container layout.
+	await get_tree().process_frame
+	if not is_instance_valid(scroll) or not scroll.is_inside_tree():
+		return
+	if offset >= 0:
+		scroll.scroll_horizontal = offset
+	elif is_instance_valid(selected_card):
+		scroll.ensure_control_visible(selected_card)
 
 func show_levels() -> void:
 	_leave_world()

@@ -25,6 +25,7 @@ const PACK_OFFSETS := {
 	"penguin": Vector2(-29, -5), "whale": Vector2(-6, -21),
 	"capybara": Vector2(-27, -6), "kitten": Vector2(-25, -5),
 	"puppy": Vector2(-27, -5), "panda": Vector2(-29, -5),
+	"otter": Vector2(-17, -5), "beaver": Vector2(-20, -5),
 }
 
 func _ready() -> void:

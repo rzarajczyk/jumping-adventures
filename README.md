@@ -1,6 +1,8 @@
 # Jumping Adventure
 
-An offline 2D Android game with six playable characters, three floating-island routes, and three difficulty levels. Drag and release to jump, collect stars, and use jetpacks to reach the final star and unlock the next route. Features original artwork, animation, music, and a Polish interface.
+An offline 2D Android game with eight playable characters, three floating-island routes, and three difficulty levels. Drag and release to jump, collect stars, and use jetpacks to reach the final star and unlock the next route. Features original artwork, animation, music, and a Polish interface.
+
+Choose a penguin, whale, capybara, kitten, puppy, panda, otter, or beaver. Swipe the character list, use the mouse wheel, or tap the arrows to see every friend.
 
 Each jetpack pickup adds three jumps to your remaining supply. Collect both pickups on a route without using them to save up six jumps.
 
@@ -32,7 +34,7 @@ Bootstrap downloads and verifies Godot **4.7.2 Standard** and its Android export
 
 For custom SDK or JDK locations, set `PENGUIN_ANDROID_SDK` and `PENGUIN_JAVA`. Keep private backups of `.tools/jumping-penguin.keystore` and `.tools/signing.json` to preserve the signing key for future updates.
 
-Every push to `master` runs the tests and publishes signed APK/AAB files to GitHub Releases.
+Every push to `master` runs the tests and publishes signed APK/AAB files to GitHub Releases. Google Play uploads are currently disabled in CI; the internal testing upload steps are commented out until the Play Console app and credentials are ready.
 
 ## Test
 
