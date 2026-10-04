@@ -1,5 +1,13 @@
 # Raport weryfikacji — Jumping Adventure 1.1.0
 
+## Zmiana parametrów jetpacka — 4 października 2026
+
+Zwiększono prędkość wybicia z 425 do 850 jednostek/s, zachowując kąt 60°. Każdy artefakt dodaje trzy ładunki do posiadanego zapasu: dwa zebrane plecaki dają sześć użyć, a zebranie drugiego przy dwóch pozostałych ładunkach daje pięć. Przycisk pokazuje dokładną liczbę dostępnych użyć. Czas animacji wynosi 0,45 s.
+
+- `python3 tools/test.py`: **1427 sprawdzeń, 0 niepowodzeń**. Sprawdzono sumowanie ładunków, sześć kolejnych użyć z aktualizacją HUD-u i blokadę siódmego, brak ponownego naliczania zebranego artefaktu oraz reset zapasu. Wszystkie dziewięć tras ukończono z 11/11 gwiazdek i sześcioma niewykorzystanymi ładunkami.
+- Pomiar fizyki 60 Hz po zwiększeniu prędkości: skok `(300, -600)` z użyciem jetpacka po 30 krokach osiągnął wysokość **364,71**, zasięg **745,03** i trwał **114 kroków**.
+- Obejrzano licznik zera i sześciu użyć w Godocie przy rozdzielczości 1280×720; tekst mieści się w przycisku.
+
 ## Wersja jednoosobowa — 1 października 2026
 
 Przejrzano wszystkie skrypty gry, zasoby poziomów, konfigurację eksportu, narzędzia, dokumentację i materiały sklepu. Obejrzano 18 źródłowych grafik PNG, ikonę sklepu, grafikę promocyjną oraz wszystkie osiem zrzutów telefonu i tabletu. Materiały i kod odpowiadają jednoosobowej grze offline. Oryginalne licencje bibliotek silnika zachowano w całości.

@@ -7,8 +7,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
 
 func send(at: Vector2, target: Vector2, color: Color) -> void:
-	for i in 3:
-		motes.append({"from": at, "to": target + Vector2(i * 32, 0), "age": -i * 0.1, "color": color})
+	for i in AdventurePowers.CHARGES_PER_PICKUP:
+		motes.append({"from": at, "to": target, "age": -i * 0.1, "color": color})
 
 func _process(delta: float) -> void:
 	for i in range(motes.size() - 1, -1, -1):

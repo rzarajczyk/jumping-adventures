@@ -188,7 +188,7 @@ func test_route(d: int, l: int) -> void:
 			await frames(6)
 	check(world.finished, "route completed %d/%d" % [d, l])
 	check(world.star_count == 11, "ten stars and finish star collectible %d/%d" % [d, l])
-	check(world.powers.jetpack == 3 and world.artifacts.all(func(item: Dictionary): return item.taken), "ordinary route collects both artifacts without consuming powers %d/%d" % [d, l])
+	check(world.powers.jetpack == 6 and world.artifacts.all(func(item: Dictionary): return item.taken), "ordinary route collects six charges from both artifacts %d/%d" % [d, l])
 	print("Route %s / %s: finished=%s, stars=%d" % [PROFILE_PATHS[d], LEVEL_PATHS[l], world.finished, world.star_count])
 	root.remove_child(world)
 	world.queue_free()

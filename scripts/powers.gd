@@ -4,8 +4,8 @@ extends RefCounted
 signal changed
 
 enum Kind { NONE, JETPACK }
-const CHARGES := 3
-const JETPACK_SPEED := JumpGesture.MAX_SPEED * 0.5
+const CHARGES_PER_PICKUP := 3
+const JETPACK_SPEED := JumpGesture.MAX_SPEED
 const JETPACK_ANGLE := PI / 3.0
 const JETPACK_DURATION := 0.45
 const JETPACK_COLOR := Color("858bdd")
@@ -22,7 +22,7 @@ func reset() -> void:
 func grant(kind: Kind) -> void:
 	if kind != Kind.JETPACK:
 		return
-	jetpack = CHARGES
+	jetpack += CHARGES_PER_PICKUP
 	changed.emit()
 
 func consume_jetpack() -> void:

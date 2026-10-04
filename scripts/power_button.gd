@@ -43,9 +43,10 @@ func _draw() -> void:
 		draw_string(ui_font, Vector2(74, 33), "Jetpack", HORIZONTAL_ALIGNMENT_LEFT, 111, 18, ink)
 		var status := "Wybij się!" if available else ("Znajdź skarb" if charges == 0 else "Chwila…")
 		draw_string(ui_font, Vector2(74, 55), status, HORIZONTAL_ALIGNMENT_LEFT, 112, 14, accent if charges > 0 else ink)
-	for i in AdventurePowers.CHARGES:
-		var at := Vector2(88 + 32 * i, 83)
-		draw_circle(at, 8, accent if i < charges else Color("e2e6e9"))
-		draw_arc(at, 8, 0, TAU, 24, accent if i < charges else Color("aebbc4"), 1.5, true)
-		if i < charges:
-			draw_circle(at + Vector2(-2, -2), 2.3, Color("fffdf6"))
+	var at := Vector2(88, 83)
+	draw_circle(at, 8, accent if charges > 0 else Color("e2e6e9"))
+	draw_arc(at, 8, 0, TAU, 24, accent if charges > 0 else Color("aebbc4"), 1.5, true)
+	if charges > 0:
+		draw_circle(at + Vector2(-2, -2), 2.3, Color("fffdf6"))
+	if ui_font:
+		draw_string(ui_font, Vector2(104, 90), "× %d" % charges, HORIZONTAL_ALIGNMENT_LEFT, 68, 20, ink)

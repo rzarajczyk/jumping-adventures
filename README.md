@@ -2,6 +2,8 @@
 
 An offline 2D Android game with six playable characters, three floating-island routes, and three difficulty levels. Drag and release to jump, collect stars, and use jetpacks to reach the final star and unlock the next route. Features original artwork, animation, music, and a Polish interface.
 
+Each jetpack pickup adds three jumps to your remaining supply. Collect both pickups on a route without using them to save up six jumps.
+
 ![A penguin uses a jetpack to jump between floating islands and collect stars](play_store/assets/feature-graphic-1024x500.jpg)
 
 ## Install

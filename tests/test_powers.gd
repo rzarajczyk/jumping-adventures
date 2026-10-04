@@ -64,7 +64,7 @@ func stand(world: PenguinWorld, island: int = 0) -> void:
 
 func check_launch(world: PenguinWorld, direction: float) -> void:
 	var velocity := world.player.velocity
-	check(absf(velocity.length() - JumpGesture.MAX_SPEED * 0.5) < 0.01, "fixed medium speed")
+	check(absf(velocity.length() - JumpGesture.MAX_SPEED) < 0.01, "doubled launch speed")
 	check(absf(rad_to_deg(atan2(-velocity.y, absf(velocity.x))) - 60.0) < 0.01, "fixed 60 degree angle")
 	check(signf(velocity.x) == direction, "launch follows facing")
 	check(world.player.jetpack_age == 0.0 and world.player.jetpack_flight, "ignition starts temporary equipment animation")
@@ -83,12 +83,14 @@ func test_world() -> void:
 	await frames(5)
 	check(world.powers.jetpack == 2, "collected artifact does not refill repeatedly")
 	await stand(world)
+	world.powers.reset()
 	world.powers.grant(AdventurePowers.Kind.JETPACK)
 	check(world.use_jetpack() and world.powers.jetpack == 2, "jetpack works directly on ground")
 	check_launch(world, 1.0)
 	check(not world.launch(Vector2(0, -500)), "ordinary jump still requires floor")
 	await stand(world)
 	check(world.launch(Vector2(300, -600)) and world.powers.jetpack == 2, "normal jump never spends jetpack")
+	world.powers.reset()
 	for direction in [1.0, -1.0]:
 		world.powers.grant(AdventurePowers.Kind.JETPACK)
 		for vy in [-700.0, 0.0, 500.0]:
@@ -103,14 +105,16 @@ func test_world() -> void:
 			check(world.player.velocity.y < 0, "gravity resumes with upward flight")
 		check(not world.use_jetpack() and world.powers.jetpack == 0, "three uses in one flight exhaust charges")
 	world.player.facing = 1.0
+	world.powers.grant(AdventurePowers.Kind.JETPACK)
+	check(world.use_jetpack() and world.powers.jetpack == 2, "spend one charge before collecting second artifact")
 	await stand(world, 4)
-	check(world.artifacts[1].taken and world.powers.jetpack == 3, "second artifact refills jetpack")
+	check(world.artifacts[1].taken and world.powers.jetpack == 5, "second artifact adds three to two remaining charges")
 	await stand(world)
 	world._begin(1, Vector2(500, 400))
 	world._drag(1, Vector2(600, 250))
 	check(world.use_jetpack() and world.gesture.pointer == -99 and world.player.aim == Vector2.ZERO, "jetpack cancels aiming and launches immediately")
 	world._end(1, Vector2(600, 250))
-	check(world.powers.jetpack == 2, "old gesture release cannot spend another charge")
+	check(world.powers.jetpack == 4, "old gesture release cannot spend another charge")
 	await frames(30)
 	check(world.player.jetpack_age >= AdventurePowers.JETPACK_DURATION, "jetpack overlay expires after ignition")
 	await stand(world)
@@ -213,6 +217,16 @@ func test_input() -> void:
 	game.world.player.state = JumpingPenguin.State.AIR
 	await frames(1)
 	check(game.jetpack_button.charges == 3 and game.power_hint_time > 0.0 and game.power_hud_effects.motes.size() == 3, "collection updates HUD, tutorial and three pearls")
+	game.world.player.position = game.world.artifact_position(game.world.artifacts[1]) + Vector2(0, 34)
+	game.world.player.velocity = Vector2.ZERO
+	game.world.player.state = JumpingPenguin.State.AIR
+	await frames(1)
+	check(game.world.artifacts[1].taken and game.jetpack_button.charges == 6, "second pickup displays six available jumps")
+	await frames(5)
+	check(game.world.powers.jetpack == 6, "remaining near a collected refill does not grant more charges")
+	for remaining in range(5, -1, -1):
+		check(game.world.use_jetpack() and game.jetpack_button.charges == remaining, "six collected charges can be spent and update HUD: %d left" % remaining)
+	check(not game.world.use_jetpack(), "seventh jump is rejected after spending six collected charges")
 	game.pause_game()
 	var hint_time: float = game.power_hint_time
 	var mote_age: float = game.power_hud_effects.motes[0].age
